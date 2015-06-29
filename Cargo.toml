@@ -1,0 +1,4 @@
+[package]
+name = "polyomino"
+version = "0.0.1"
+authors = ["amorgan"]
