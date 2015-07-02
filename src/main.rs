@@ -37,13 +37,12 @@ impl Polyomino {
 
     pub fn rotatecw(&self) -> Polyomino {
         let height = self.top_right().y;
+        Polyomino { points: self.points.iter().map(|p| Point {x: height-p.y, y: p.x}).collect() }
+    }
 
-        let mut new_points = Vec::new();
-        
-        for p in self.points.iter().map(|p| Point {x: height-p.y, y: p.x}) {
-            new_points.push(p);
-        }
-        Polyomino{ points: new_points }
+    pub fn flip(&self) -> Polyomino {
+        let width = self.top_right().x;
+        Polyomino { points: self.points.iter().map(|p| Point {x: width-p.x, y: p.y}).collect() }
     }
 }
 
@@ -59,5 +58,17 @@ fn main() {
     p.rotatecw().show();
     println!("");
     p.rotatecw().rotatecw().show();
+    println!("");
+    p.rotatecw().rotatecw().rotatecw().show();
+    println!("");
+    p.flip().show();
+    println!("");
+    p.flip().rotatecw().show();
+    println!("");
+    p.flip().rotatecw().rotatecw().show();
+    println!("");
+    p.flip().rotatecw().rotatecw().rotatecw().show();
+
+     
 }
       
