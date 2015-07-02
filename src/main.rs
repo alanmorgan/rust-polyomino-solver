@@ -35,7 +35,7 @@ impl Polyomino {
         }
     }
 
-    pub fn rotatecw(&self) -> Polyomino {
+    pub fn rotate(&self) -> Polyomino {
         let height = self.top_right().y;
         Polyomino { points: self.points.iter().map(|p| Point {x: height-p.y, y: p.x}).collect() }
     }
@@ -55,19 +55,19 @@ fn main() {
 
     p.show();
     println!("");
-    p.rotatecw().show();
+    p.rotate().show();
     println!("");
-    p.rotatecw().rotatecw().show();
+    p.rotate().rotate().show();
     println!("");
-    p.rotatecw().rotatecw().rotatecw().show();
+    p.rotate().rotate().rotate().show();
     println!("");
     p.flip().show();
     println!("");
-    p.flip().rotatecw().show();
+    p.flip().rotate().show();
     println!("");
-    p.flip().rotatecw().rotatecw().show();
+    p.flip().rotate().rotate().show();
     println!("");
-    p.flip().rotatecw().rotatecw().rotatecw().show();
+    p.flip().rotate().rotate().rotate().show();
 
      
 }
