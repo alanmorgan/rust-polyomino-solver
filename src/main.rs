@@ -2,8 +2,11 @@ use std::cmp;
 
 mod poly;
 
+use poly::polyomino;
+use poly::point;
+
 fn main() {
-    let p = poly::Polyomino{points: vec![poly::Point{x:0,y:1}, poly::Point{x:1,y:0}, poly::Point{x:1,y:1}, poly::Point{x:1,y:2}, poly::Point{x:2,y:2}]};
+    let p = polyomino::Polyomino{points: vec![point::Point{x:0,y:1}, point::Point{x:1,y:0}, point::Point{x:1,y:1}, point::Point{x:1,y:2}, point::Point{x:2,y:2}]};
 
     println!("p = {:?}", p);
     println!("top right   = {:?}", p.top_right());

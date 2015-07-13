@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, Copy)]
-struct Point {
-    x: i32,
-    y: i32
+pub struct Point {
+    pub x: i32,
+    pub y: i32
 }
