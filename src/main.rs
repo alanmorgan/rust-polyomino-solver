@@ -2,11 +2,17 @@ use std::cmp;
 
 mod poly;
 
-use poly::polyomino;
-use poly::point;
-
+use poly::polyomino::Polyomino;
+use poly::point::Point;
+use poly::board::Board;
 fn main() {
-    let p = polyomino::Polyomino{points: vec![point::Point{x:0,y:1}, point::Point{x:1,y:0}, point::Point{x:1,y:1}, point::Point{x:1,y:2}, point::Point{x:2,y:2}]};
+    let b = Board::new(3, 20);
+    b.print();
+}
+
+/*
+{
+    let p = Polyomino::new (vec![Point::new(0, 1), Point::new(1,0), Point::new(1,1), Point::new(1,2), Point::new(2,2)]);
 
     println!("p = {:?}", p);
     println!("top right   = {:?}", p.top_right());
@@ -27,7 +33,5 @@ fn main() {
     p.flip().rotate().rotate().show();
     println!("");
     p.flip().rotate().rotate().rotate().show();
-
-     
 }
-      
+*/      
