@@ -1,11 +1,11 @@
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum BoardState {
-     Void,      // A hole in the board
+     Void,      // Out of bounds/a hole in the board
      Empty,     // A valid part of the board, but no piece is there
      Full(i32)  // Has a piece
 }
 
-fn rep(b : &BoardStates) -> char {
+fn rep(b : &BoardState) -> char {
     match *b {
         BoardState::Void => ' ',
         BoardState::Empty => '.',
@@ -13,12 +13,14 @@ fn rep(b : &BoardStates) -> char {
     }
 }
 
+#[allow(dead_code)]
 pub struct Board {
     height: i32,
     width: i32,
     board: Vec<Vec<BoardState>>
 }
 
+#[allow(dead_code)]
 impl Board {
     pub fn new(h: i32, w: i32) -> Board {
         
@@ -42,6 +44,12 @@ impl Board {
         }
     }
 
-    pub fn get(x: i32, y: i32) -> BoardState {
+    pub fn get(&self, x: usize, y: usize) -> BoardState {
+        if let Some(v) = self.board.get(y) {
+            if let Some(bs) = v.get(x) {
+                return *bs
+            }
+        }
+        BoardState::Void
     }
 }

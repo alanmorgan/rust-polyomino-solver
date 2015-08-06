@@ -1,22 +1,26 @@
-use poly::point::Point;
 use std::cmp;
+use std::collections::HashSet;
+
+use poly::point::Point;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Polyomino {
-    points: Vec<Point>
+    points: HashSet<Point>
 }
 
+#[allow(dead_code)]
 impl Polyomino {
-    pub fn new(p: Vec<Point>) -> Polyomino {
+    pub fn new(p: HashSet<Point>) -> Polyomino {
         Polyomino { points: p }
     }
     
     pub fn top_right(&self) -> Point {
-        self.points.iter().fold(self.points[0], |a, ref p| Point { x: cmp::max(a.x, p.x), y: cmp::max(a.y, p.y) })
+        self.points.iter().fold(Point::min_point(), |a, ref p| Point { x: cmp::max(a.x, p.x), y: cmp::max(a.y, p.y) })
     }
     
     pub fn bottom_left(&self) -> Point {
-        self.points.iter().fold(self.points[0], |a, ref p| Point { x: cmp::min(a.x, p.x), y: cmp::min(a.y, p.y) })
+        self.points.iter().fold(Point::max_point(), |a, ref p| Point { x: cmp::min(a.x, p.x), y: cmp::min(a.y, p.y) })
     }
 
     pub fn show(&self) {

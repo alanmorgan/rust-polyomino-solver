@@ -1,4 +1,5 @@
 use std::cmp;
+use std::collections::HashSet;
 
 mod poly;
 
@@ -10,9 +11,16 @@ fn main() {
     b.print();
 }
 
-/*
-{
-    let p = Polyomino::new (vec![Point::new(0, 1), Point::new(1,0), Point::new(1,1), Point::new(1,2), Point::new(2,2)]);
+#[test]
+fn make_polys () {
+    let mut s = HashSet::new();
+    s.insert(Point::new(0,1));
+    s.insert(Point::new(1,0));
+    s.insert(Point::new(1,1));
+    s.insert(Point::new(1,2));
+    s.insert(Point::new(2,2));
+    
+    let p = Polyomino::new (s);
 
     println!("p = {:?}", p);
     println!("top right   = {:?}", p.top_right());
@@ -34,4 +42,3 @@ fn main() {
     println!("");
     p.flip().rotate().rotate().rotate().show();
 }
-*/      
