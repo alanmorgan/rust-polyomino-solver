@@ -9,6 +9,15 @@ pub struct Polyomino {
     points: HashSet<Point>
 }
 
+impl PartialEq for Polyomino {
+    fn eq(&self, other: &Polyomino) -> bool {
+        self.points == other.points
+    }
+
+    fn ne(&self, other: &Polyomino) -> bool {
+        !self.eq(other)
+    }
+}
 #[allow(dead_code)]
 impl Polyomino {
     pub fn new(p: HashSet<Point>) -> Polyomino {

@@ -20,25 +20,9 @@ fn make_polys () {
     s.insert(Point::new(1,2));
     s.insert(Point::new(2,2));
     
-    let p = Polyomino::new (s);
+    let p = Polyomino::new(s);
 
-    println!("p = {:?}", p);
-    println!("top right   = {:?}", p.top_right());
-    println!("bottom left = {:?}", p.bottom_left());
-
-    p.show();
-    println!("");
-    p.rotate().show();
-    println!("");
-    p.rotate().rotate().show();
-    println!("");
-    p.rotate().rotate().rotate().show();
-    println!("");
-    p.flip().show();
-    println!("");
-    p.flip().rotate().show();
-    println!("");
-    p.flip().rotate().rotate().show();
-    println!("");
-    p.flip().rotate().rotate().rotate().show();
+    assert_eq!(p, p);
+    assert!(p != p.rotate());
+    assert_eq!(p, p.rotate().rotate().rotate().rotate());
 }
