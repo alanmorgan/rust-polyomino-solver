@@ -1,28 +1,30 @@
+use poly::polyomino::Polyomino;
+
 #[derive(Clone, Copy)]
-pub enum BoardState {
+pub enum BoardState<'a> {
      Void,      // Out of bounds/a hole in the board
      Empty,     // A valid part of the board, but no piece is there
-     Full(i32)  // Has a piece
+     Full(& 'a Polyomino)  // Has a piece
 }
 
 fn rep(b : &BoardState) -> char {
     match *b {
         BoardState::Void => ' ',
         BoardState::Empty => '.',
-        BoardState::Full(_i) => 'X'
+        BoardState::Full(_p) => 'X'
     }
 }
 
 #[allow(dead_code)]
-pub struct Board {
+pub struct Board<'a> {
     height: i32,
     width: i32,
-    board: Vec<Vec<BoardState>>
+    board: Vec<Vec<BoardState<'a>>>
 }
 
 #[allow(dead_code)]
-impl Board {
-    pub fn new(h: i32, w: i32) -> Board {
+impl<'a> Board<'a> {
+    pub fn new(h: i32, w: i32) -> Board<'a> {
         
         let mut board = Vec::new();
 
