@@ -46,7 +46,7 @@ impl<'a> Board<'a> {
         }
     }
 
-    pub fn set(&mut self, x: usize, y: usize, polyomino: &'a Polyomino) -> bool {
+    fn set(&mut self, x: usize, y: usize, polyomino: &'a Polyomino) -> bool {
         if x < self.width && y < self.height && self.board[x][y] == BoardState::Empty {
             self.board[x][y] = BoardState::Full(polyomino);
             return true
@@ -55,17 +55,17 @@ impl<'a> Board<'a> {
         false
     }
 
-    pub fn get(&self, x: usize, y: usize) -> BoardState<'a> {
-        if x < self.width && y < self.height {
-            return self.board[x][y]
+    pub fn get(&self, x: i32, y: i32) -> BoardState<'a> {
+        if x >= 0 && (x as usize) < self.width && y >= 0 && (y as usize) < self.height {
+            return self.board[x as usize][y as usize]
         }
         
         BoardState::Void
     }
 
-    pub fn add(&self, p: Polyomino, ll: Point) -> bool {
-        if p.points.iter().any(|&pt| self.get((pt.x + ll.x) as usize, (pt.y + ll.y) as usize) != BoardState::Empty) {
-            return false
+    pub fn add_polyomino(&self, p: &'a Polyomino, ll: Point) -> bool {
+        if p.points.iter().any(|&pt| self.get(pt.x + ll.x, pt.y + ll.y) != BoardState::Empty) {
+            return false;
         }
 
         true
