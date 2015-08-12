@@ -6,7 +6,7 @@ use poly::point::Point;
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct Polyomino {
-    points: HashSet<Point>
+    pub points: HashSet<Point>
 }
 
 impl PartialEq for Polyomino {
@@ -18,6 +18,7 @@ impl PartialEq for Polyomino {
         !self.eq(other)
     }
 }
+
 #[allow(dead_code)]
 impl Polyomino {
     pub fn new(p: HashSet<Point>) -> Polyomino {
