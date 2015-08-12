@@ -64,7 +64,7 @@ impl<'a> Board<'a> {
     }
 
     pub fn add_polyomino(&self, p: &'a Polyomino, ll: Point) -> bool {
-        if p.points.iter().any(|&pt| self.get(pt.x + ll.x, pt.y + ll.y) != BoardState::Empty) {
+        if p.piter().any(|&pt| self.get(pt.x + ll.x, pt.y + ll.y) != BoardState::Empty) {
             return false;
         }
 

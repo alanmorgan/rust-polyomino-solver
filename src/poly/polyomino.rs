@@ -1,12 +1,13 @@
 use std::cmp;
 use std::collections::HashSet;
+use std::collections::hash_set::Iter;
 
 use poly::point::Point;
 
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct Polyomino {
-    pub points: HashSet<Point>
+    points: HashSet<Point>
 }
 
 impl PartialEq for Polyomino {
@@ -56,6 +57,10 @@ impl Polyomino {
     pub fn flip(&self) -> Polyomino {
         let width = self.top_right().x;
         Polyomino { points: self.points.iter().map(|p| Point {x: width-p.x, y: p.y}).collect() }
+    }
+
+    pub fn piter(&self) -> Iter<Point> {
+        self.points.iter()
     }
 }
 
