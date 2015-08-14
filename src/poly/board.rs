@@ -46,9 +46,44 @@ impl<'a> Board<'a> {
         }
     }
 
-    fn set(&mut self, x: usize, y: usize, polyomino: &'a Polyomino) -> bool {
-        if x < self.width && y < self.height && self.board[x][y] == BoardState::Empty {
-            self.board[x][y] = BoardState::Full(polyomino);
+    pub fn print_row(&self, y: i32) {
+        let ref row = self.board[y as usize];
+
+        for (x, &piece) in row.iter().enumerate() {
+            if x == 0 {
+                print!("{}", if piece == BoardState::Void {
+                    " "
+                } else {
+                    "|"
+                });
+            }
+
+            print!("{}", if let BoardState::Full(_p) = piece {
+                "X"
+            } else {
+                " "
+            });
+
+            print!("{}", if piece == self.get((x+1) as i32, y) {
+                " "
+            } else {
+                "|"
+            });
+        }
+
+        println!("");
+    }
+    
+    fn set(&mut self, x: i32, y: i32, polyomino: &'a Polyomino) -> bool {
+        if x < 0 || y < 0 {
+            return false
+        }
+        
+        let xu = x as usize;
+        let yu = y as usize;
+        
+        if xu < self.width && yu < self.height && self.board[yu][xu] == BoardState::Empty {
+            self.board[yu][xu] = BoardState::Full(polyomino);
             return true
         }
 
@@ -57,17 +92,21 @@ impl<'a> Board<'a> {
 
     pub fn get(&self, x: i32, y: i32) -> BoardState<'a> {
         if x >= 0 && (x as usize) < self.width && y >= 0 && (y as usize) < self.height {
-            return self.board[x as usize][y as usize]
+            return self.board[y as usize][x as usize]
         }
         
         BoardState::Void
     }
 
-    pub fn add_polyomino(&self, p: &'a Polyomino, ll: Point) -> bool {
+    pub fn add_polyomino(&mut self, p: &'a Polyomino, ll: Point) -> bool {
         if p.piter().any(|&pt| self.get(pt.x + ll.x, pt.y + ll.y) != BoardState::Empty) {
             return false;
         }
 
+        for pt in p.piter() {
+           self.set(pt.x + ll.x, pt.y + ll.y, p); 
+        }
+        
         true
     }
 }
