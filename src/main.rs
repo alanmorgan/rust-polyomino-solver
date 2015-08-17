@@ -12,10 +12,6 @@ fn main() {
 
     b.add_polyomino(&p, Point::new(0, 0));
     b.print();
-
-    b.print_row(0);
-    b.print_row(1);
-    b.print_row(2);
 }
 
 fn make_simple_polyomino() -> Polyomino {

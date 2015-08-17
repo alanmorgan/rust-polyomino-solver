@@ -38,17 +38,28 @@ impl<'a> Board<'a> {
     }
 
     pub fn print(&self) {
-        for row in self.board.iter() {
-            for piece in row.iter() {
-                print!("{}", rep(piece));
-            }
-            println!("");
+        self.print_top_row_border();
+
+        for (y, row) in self.board.iter().enumerate() {
+            self.print_row(y as i32, row);
         }
     }
 
-    pub fn print_row(&self, y: i32) {
-        let ref row = self.board[y as usize];
+    fn print_top_row_border(&self) {
+        print!("+");
+        
+        for (x, &piece) in self.board[0].iter().enumerate() {
+            print!("{}", if piece == BoardState::Void {
+                "  "
+            } else {
+                "-+"
+            });
+        }
 
+        println!("");
+    }
+    
+    fn print_row(&self, y: i32, row: &Vec<BoardState>) {
         for (x, &piece) in row.iter().enumerate() {
             if x == 0 {
                 print!("{}", if piece == BoardState::Void {
@@ -58,16 +69,28 @@ impl<'a> Board<'a> {
                 });
             }
 
-            print!("{}", if let BoardState::Full(_p) = piece {
-                "X"
-            } else {
-                " "
-            });
+            print!("{}", rep(&piece));
 
             print!("{}", if piece == self.get((x+1) as i32, y) {
                 " "
             } else {
                 "|"
+            });
+        }
+
+        println!("");
+
+        self.print_row_bottom_border(y, row);
+    }
+    
+    fn print_row_bottom_border(&self, y: i32, row: &Vec<BoardState>) {
+        print!("+");
+        
+        for (x, &piece) in row.iter().enumerate() {
+            print!("{}", if piece == self.get(x as i32, y+1) {
+                " +"
+            } else {
+                "-+"
             });
         }
 
