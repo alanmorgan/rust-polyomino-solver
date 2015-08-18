@@ -50,7 +50,11 @@ impl<'a> Board<'a> {
         
         for (x, &piece) in self.board[0].iter().enumerate() {
             print!("{}", if piece == BoardState::Void {
-                "  "
+                if self.get((x+1) as i32, 0) == BoardState::Void {
+                    "  "
+                } else {
+                    " +"
+                }
             } else {
                 "-+"
             });
@@ -88,7 +92,11 @@ impl<'a> Board<'a> {
         
         for (x, &piece) in row.iter().enumerate() {
             print!("{}", if piece == self.get(x as i32, y+1) {
-                " +"
+                if piece == self.get((x as i32)+1, y) && self.get(x as i32, y+1) == self.get((x as i32)+1, y+1) {
+                    "  "
+                } else {
+                    " +"
+                }
             } else {
                 "-+"
             });
