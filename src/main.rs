@@ -1,4 +1,3 @@
-use std::cmp;
 use std::collections::HashSet;
 
 mod poly;
@@ -11,7 +10,8 @@ fn main() {
     let mut b = Board::new(3, 20);
 
     b.add_polyomino(&p, Point::new(0, 0));
-    b.print();
+
+    println!("{}", b);
 }
 
 fn make_simple_polyomino() -> Polyomino {

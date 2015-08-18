@@ -1,3 +1,5 @@
+use std::fmt;
+
 use poly::point::Point;
 use poly::polyomino::Polyomino;
 
@@ -23,6 +25,19 @@ pub struct Board<'a> {
     board: Vec<Vec<BoardState<'a>>>
 }
 
+impl<'a> fmt::Display for Board<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.print_top_row_border(f);
+
+        for (y, row) in self.board.iter().enumerate() {
+            self.print_row(f, y as i32, row);
+        }
+
+        write!(f, "")
+    }
+
+}
+
 #[allow(dead_code)]
 impl<'a> Board<'a> {
     pub fn new(h: usize, w: usize) -> Board<'a> {
@@ -37,74 +52,6 @@ impl<'a> Board<'a> {
                 board: board }
     }
 
-    pub fn print(&self) {
-        self.print_top_row_border();
-
-        for (y, row) in self.board.iter().enumerate() {
-            self.print_row(y as i32, row);
-        }
-    }
-
-    fn print_top_row_border(&self) {
-        print!("+");
-        
-        for (x, &piece) in self.board[0].iter().enumerate() {
-            print!("{}", if piece == BoardState::Void {
-                if self.get((x+1) as i32, 0) == BoardState::Void {
-                    "  "
-                } else {
-                    " +"
-                }
-            } else {
-                "-+"
-            });
-        }
-
-        println!("");
-    }
-    
-    fn print_row(&self, y: i32, row: &Vec<BoardState>) {
-        for (x, &piece) in row.iter().enumerate() {
-            if x == 0 {
-                print!("{}", if piece == BoardState::Void {
-                    " "
-                } else {
-                    "|"
-                });
-            }
-
-            print!("{}", rep(&piece));
-
-            print!("{}", if piece == self.get((x+1) as i32, y) {
-                " "
-            } else {
-                "|"
-            });
-        }
-
-        println!("");
-
-        self.print_row_bottom_border(y, row);
-    }
-    
-    fn print_row_bottom_border(&self, y: i32, row: &Vec<BoardState>) {
-        print!("+");
-        
-        for (x, &piece) in row.iter().enumerate() {
-            print!("{}", if piece == self.get(x as i32, y+1) {
-                if piece == self.get((x as i32)+1, y) && self.get(x as i32, y+1) == self.get((x as i32)+1, y+1) {
-                    "  "
-                } else {
-                    " +"
-                }
-            } else {
-                "-+"
-            });
-        }
-
-        println!("");
-    }
-    
     fn set(&mut self, x: i32, y: i32, polyomino: &'a Polyomino) -> bool {
         if x < 0 || y < 0 {
             return false
@@ -139,5 +86,65 @@ impl<'a> Board<'a> {
         }
         
         true
+    }
+    
+    fn print_top_row_border(&self, f: &mut fmt::Formatter) {
+        let _ = write!(f, "+");
+        
+        for (x, &piece) in self.board[0].iter().enumerate() {
+            let _ = write!(f, "{}", if piece == BoardState::Void {
+                if self.get((x+1) as i32, 0) == BoardState::Void {
+                    "  "
+                } else {
+                    " +"
+                }
+            } else {
+                "-+"
+            });
+        }
+
+        let _ = writeln!(f, "");
+    }
+    
+    fn print_row(&self, f: &mut fmt::Formatter, y: i32, row: &Vec<BoardState>) {
+        for (x, &piece) in row.iter().enumerate() {
+            if x == 0 {
+                let _ = write!(f, "{}", if piece == BoardState::Void {
+                    " "
+                } else {
+                    "|"
+                });
+            }
+
+            let _ = write!(f, "{}", rep(&piece));
+
+            let _ = write!(f, "{}", if piece == self.get((x+1) as i32, y) {
+                " "
+            } else {
+                "|"
+            });
+        }
+
+        let _ = writeln!(f, "");
+
+        self.print_row_bottom_border(f, y, row);
+    }
+    
+    fn print_row_bottom_border(&self, f: &mut fmt::Formatter, y: i32, row: &Vec<BoardState>) {
+        let _ = write!(f, "+");
+        
+        for (x, &piece) in row.iter().enumerate() {
+            let _ = write!(f, "{}", if piece == self.get(x as i32, y+1) {
+                if piece == self.get((x as i32)+1, y) && self.get(x as i32, y+1) == self.get((x as i32)+1, y+1) {
+                    "  "
+                } else {
+                    " +"
+                }
+            } else {
+                "-+"
+            });
+        }
+
+        let _ = writeln!(f, "");
     }
 }
