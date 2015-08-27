@@ -2,3 +2,12 @@
 name = "polyomino"
 version = "0.0.1"
 authors = ["amorgan"]
+
+[dependencies]
+num="*"
+byteorder="*"
+rand="*"
+
+#[dependencies.ndarray]
+#git="https://github.com/bluss/rust-ndarray.git"
+#branch="master"
