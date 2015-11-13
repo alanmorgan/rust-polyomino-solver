@@ -22,15 +22,15 @@ fn rep(b : &BoardState) -> char {
 pub struct Board<'a> {
     height: usize,
     width: usize,
-    board: Vec<Vec<BoardState<'a>>>
+    board: Vec<BoardState<'a>>
 }
 
 impl<'a> fmt::Display for Board<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.print_top_row_border(f);
 
-        for (y, row) in self.board.iter().enumerate() {
-            self.print_row(f, y as i32, row);
+        for y in 0 .. self.height {
+            self.print_row(f, y as i32);
         }
 
         write!(f, "")
@@ -41,15 +41,9 @@ impl<'a> fmt::Display for Board<'a> {
 #[allow(dead_code)]
 impl<'a> Board<'a> {
     pub fn new(h: usize, w: usize) -> Board<'a> {
-        let mut board = Vec::new();
-
-        for _ in 0 .. h {
-            board.push(vec![BoardState::Empty; w as usize]);
-        }
-
         Board { height: h,
                 width: w,
-                board: board }
+                board: vec![BoardState::Empty; h*w as usize] }
     }
 
     fn set(&mut self, x: i32, y: i32, polyomino: &'a Polyomino) -> bool {
@@ -59,9 +53,11 @@ impl<'a> Board<'a> {
         
         let xu = x as usize;
         let yu = y as usize;
+
+        let idx = xu + yu * self.width;
         
-        if xu < self.width && yu < self.height && self.board[yu][xu] == BoardState::Empty {
-            self.board[yu][xu] = BoardState::Full(polyomino);
+        if xu < self.width && yu < self.height && self.board[idx] == BoardState::Empty {
+            self.board[idx] = BoardState::Full(polyomino);
             return true
         }
 
@@ -69,8 +65,13 @@ impl<'a> Board<'a> {
     }
 
     pub fn get(&self, x: i32, y: i32) -> BoardState<'a> {
-        if x >= 0 && (x as usize) < self.width && y >= 0 && (y as usize) < self.height {
-            return self.board[y as usize][x as usize]
+        let xu = x as usize;
+        let yu = y as usize;
+        
+        let idx = xu + yu * self.width;
+        
+        if x >= 0 && xu < self.width && y >= 0 && yu < self.height {
+            return self.board[idx]
         }
         
         BoardState::Void
@@ -90,8 +91,10 @@ impl<'a> Board<'a> {
     
     fn print_top_row_border(&self, f: &mut fmt::Formatter) {
         let _ = write!(f, "+");
-        
-        for (x, &piece) in self.board[0].iter().enumerate() {
+
+        for x in 0 .. self.width {
+            let piece = self.get(x as i32, 0);
+            
             let _ = write!(f, "{}", if piece == BoardState::Void {
                 if self.get((x+1) as i32, 0) == BoardState::Void {
                     "  "
@@ -106,8 +109,10 @@ impl<'a> Board<'a> {
         let _ = writeln!(f, "");
     }
     
-    fn print_row(&self, f: &mut fmt::Formatter, y: i32, row: &Vec<BoardState>) {
-        for (x, &piece) in row.iter().enumerate() {
+    fn print_row(&self, f: &mut fmt::Formatter, y: i32) {
+        for x in 0 .. self.width {
+            let piece = self.get(x as i32, y);
+            
             if x == 0 {
                 let _ = write!(f, "{}", if piece == BoardState::Void {
                     " "
@@ -127,13 +132,15 @@ impl<'a> Board<'a> {
 
         let _ = writeln!(f, "");
 
-        self.print_row_bottom_border(f, y, row);
+        self.print_row_bottom_border(f, y);
     }
     
-    fn print_row_bottom_border(&self, f: &mut fmt::Formatter, y: i32, row: &Vec<BoardState>) {
+    fn print_row_bottom_border(&self, f: &mut fmt::Formatter, y: i32) {
         let _ = write!(f, "+");
-        
-        for (x, &piece) in row.iter().enumerate() {
+
+        for x in 0 .. self.width {
+            let piece = self.get(x as i32, y);
+            
             let _ = write!(f, "{}", if piece == self.get(x as i32, y+1) {
                 if piece == self.get((x as i32)+1, y) && self.get(x as i32, y+1) == self.get((x as i32)+1, y+1) {
                     "  "
