@@ -7,10 +7,12 @@ use poly::point::Point;
 use poly::board::Board;
 fn main() {
     let p = make_simple_polyomino();
+    let p1 = p.rotate();
     let mut b = Board::new(3, 20);
 
     b.add_polyomino(&p, Point::new(0, 0));
-
+    b.add_polyomino(&p1, Point::new(3,0));
+    
     println!("{}", b);
 }
 
