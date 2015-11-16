@@ -5,6 +5,7 @@ mod poly;
 use poly::polyomino::Polyomino;
 use poly::point::Point;
 use poly::board::Board;
+
 fn main() {
     let p = make_simple_polyomino();
     let p1 = p.rotate();
