@@ -27,10 +27,78 @@ pub struct Board<'a> {
 
 impl<'a> fmt::Display for Board<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.print_top_row_border(f);
+
+        fn print_top_row_border(s: &Board, f: &mut fmt::Formatter) {
+            let _ = write!(f, "+");
+
+            for x in 0 .. s.width {
+                let piece = s.get(x, 0);
+                
+                let _ = write!(f, "{}", if piece == BoardState::Void {
+                    if s.get(x+1, 0) == BoardState::Void {
+                        "  "
+                    } else {
+                        " +"
+                    }
+                } else {
+                    "-+"
+                });
+            }
+
+            let _ = writeln!(f, "");
+        }
+        
+        fn print_row(s: &Board, f: &mut fmt::Formatter, y: usize) {
+            for x in 0 .. s.width {
+                let piece = s.get(x, y);
+                
+                if x == 0 {
+                    let _ = write!(f, "{}", if piece == BoardState::Void {
+                        " "
+                    } else {
+                        "|"
+                    });
+                }
+
+                let _ = write!(f, "{}", rep(&piece));
+
+                let _ = write!(f, "{}", if piece == s.get(x+1, y) {
+                    " "
+                } else {
+                    "|"
+                });
+            }
+
+            let _ = writeln!(f, "");
+
+            print_row_bottom_border(s, f, y);
+        }
+        
+        fn print_row_bottom_border(s: &Board, f: &mut fmt::Formatter, y: usize) {
+            let _ = write!(f, "+");
+
+            for x in 0 .. s.width {
+                let piece = s.get(x, y);
+                
+                let _ = write!(f, "{}", if piece == s.get(x, y+1) {
+                    if piece == s.get(x+1, y) && s.get(x, y+1) == s.get(x+1, y+1) {
+                        "  "
+                    } else {
+                        " +"
+                    }
+                } else {
+                    "-+"
+                });
+            }
+
+            let _ = writeln!(f, "");
+        }
+
+        
+        print_top_row_border(self, f);
 
         for y in 0 .. self.height {
-            self.print_row(f, y);
+            print_row(self, f, y);
         }
 
         write!(f, "")
@@ -43,7 +111,7 @@ impl<'a> Board<'a> {
     pub fn new(h: usize, w: usize) -> Board<'a> {
         Board { height: h,
                 width: w,
-                board: vec![BoardState::Empty; h*w as usize] }
+                board: vec![BoardState::Empty; h*w] }
     }
 
     fn set(&mut self, x: usize, y: usize, polyomino: &'a Polyomino) -> bool {
@@ -79,69 +147,4 @@ impl<'a> Board<'a> {
         true
     }
     
-    fn print_top_row_border(&self, f: &mut fmt::Formatter) {
-        let _ = write!(f, "+");
-
-        for x in 0 .. self.width {
-            let piece = self.get(x, 0);
-            
-            let _ = write!(f, "{}", if piece == BoardState::Void {
-                if self.get(x+1, 0) == BoardState::Void {
-                    "  "
-                } else {
-                    " +"
-                }
-            } else {
-                "-+"
-            });
-        }
-
-        let _ = writeln!(f, "");
-    }
-    
-    fn print_row(&self, f: &mut fmt::Formatter, y: usize) {
-        for x in 0 .. self.width {
-            let piece = self.get(x, y);
-            
-            if x == 0 {
-                let _ = write!(f, "{}", if piece == BoardState::Void {
-                    " "
-                } else {
-                    "|"
-                });
-            }
-
-            let _ = write!(f, "{}", rep(&piece));
-
-            let _ = write!(f, "{}", if piece == self.get(x+1, y) {
-                " "
-            } else {
-                "|"
-            });
-        }
-
-        let _ = writeln!(f, "");
-
-        self.print_row_bottom_border(f, y);
-    }
-    
-    fn print_row_bottom_border(&self, f: &mut fmt::Formatter, y: usize) {
-        let _ = write!(f, "+");
-
-        for x in 0 .. self.width {
-            let piece = self.get(x, y);
-            
-            let _ = write!(f, "{}", if piece == self.get(x, y+1) {
-                if piece == self.get(x+1, y) && self.get(x, y+1) == self.get(x+1, y+1) {
-                    "  "
-                } else {
-                    " +"
-                }
-            } else {
-                "-+"
-            });
-        }
-
-        let _ = writeln!(f, "");
-    }
 }
