@@ -1,3 +1,4 @@
+use std::ops::Range;
 use std::fmt;
 
 use poly::point::Point;
@@ -18,7 +19,6 @@ fn rep(b : &BoardState) -> char {
     }
 }
 
-#[allow(dead_code)]
 pub struct Board<'a> {
     height: usize,
     width: usize,
@@ -146,5 +146,30 @@ impl<'a> Board<'a> {
         
         true
     }
+
+    pub fn row_range(&self) -> Range<usize> {
+       0 .. self.height
+    }
+
+    pub fn col_range(&self) -> Range<usize> {
+       0 .. self.width
+    }
+}
+
+mod board_utils {
+    use poly::board::Board;
+    use poly::board::BoardState;
+    use poly::point::Point;
     
+    pub fn get_first_unoccupied(b: &Board) -> Option<Point> {
+        for r in b.row_range() {
+            for c in b.col_range() {
+                if b.get(r, c) == BoardState::Empty {
+                    return Some(Point::new(r, c));
+                }
+            }
+        }
+
+        None
+    }
 }
