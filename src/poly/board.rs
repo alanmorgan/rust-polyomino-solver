@@ -158,7 +158,7 @@ impl<'a> Board<'a> {
     }
 }
 
-mod board_utils {
+pub mod board_utils {
     use poly::board::Board;
     use poly::board::BoardState;
     use poly::point::Point;
@@ -204,7 +204,7 @@ mod board_utils {
         adj
     }
 
-    fn get_all_adjacent(p: Point, b: &Board) -> HashSet<Point> {
+    pub fn get_all_adjacent(p: Point, b: &Board) -> HashSet<Point> {
         let mut region = HashSet::new();
         
         if b.get(p.x, p.y) != BoardState::Empty {

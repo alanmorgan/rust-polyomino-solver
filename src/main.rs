@@ -5,16 +5,31 @@ mod poly;
 use poly::polyomino::Polyomino;
 use poly::point::Point;
 use poly::board::Board;
+use poly::board::board_utils;
 
 fn main() {
     let p = make_simple_polyomino();
     let p1 = p.rotate();
     let mut b = Board::new(3, 20);
 
-    b.add_polyomino(&p, Point::new(0, 0));
-    b.add_polyomino(&p1, Point::new(3,0));
+    b.add_polyomino(&p, Point::new(1, 0));
+    b.add_polyomino(&p1, Point::new(5,0));
     
     println!("{}", b);
+
+    let adj = board_utils::get_all_adjacent(Point::new(0,0), &b);
+
+    println!("Adjacent to 0,0");
+    for p in adj {
+        println!("{}, {}", p.x, p.y);
+    }
+
+    let adj = board_utils::get_all_adjacent(Point::new(4,0), &b);
+
+    println!("Adjacent to 4,0");
+    for p in adj {
+        println!("{}, {}", p.x, p.y);
+    }
 }
 
 fn make_simple_polyomino() -> Polyomino {
