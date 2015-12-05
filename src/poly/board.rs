@@ -117,7 +117,7 @@ impl<'a> Board<'a> {
     fn set(&mut self, x: usize, y: usize, polyomino: &'a Polyomino) -> bool {
         let idx = x + y * self.width;
         
-        if x < self.width && y < self.height && self.board[idx] == BoardState::Empty {
+        if self.on_board(x, y) && self.board[idx] == BoardState::Empty {
             self.board[idx] = BoardState::Full(polyomino);
             return true
         }
@@ -126,10 +126,8 @@ impl<'a> Board<'a> {
     }
 
     pub fn get(&self, x: usize, y: usize) -> BoardState<'a> {
-        let idx = x + y * self.width;
-        
-        if x < self.width && y < self.height {
-            return self.board[idx]
+        if self.on_board(x, y) {
+            return self.board[x + y * self.width];
         }
         
         BoardState::Void
@@ -147,6 +145,10 @@ impl<'a> Board<'a> {
         true
     }
 
+    pub fn on_board(&self, x: usize, y: usize) -> bool {
+        x < self.width && y < self.height
+    }
+    
     pub fn row_range(&self) -> Range<usize> {
        0 .. self.height
     }
@@ -161,6 +163,9 @@ mod board_utils {
     use poly::board::BoardState;
     use poly::point::Point;
     
+    use std::collections::HashSet;
+    use std::collections::VecDeque;
+    
     pub fn get_first_unoccupied(b: &Board) -> Option<Point> {
         for r in b.row_range() {
             for c in b.col_range() {
@@ -171,5 +176,59 @@ mod board_utils {
         }
 
         None
+    }
+
+    fn get_adjacent(p: Point, b: &Board) -> HashSet<Point> {
+        let mut adj = HashSet::new();
+
+        // UP
+        if p.y != 0 && b.get(p.x, p.y-1) == BoardState::Empty {
+            adj.insert(Point::new(p.x, p.y-1));
+        }
+        
+        // LEFT
+        if p.x != 0 && b.get(p.x-1, p.y) == BoardState::Empty {
+            adj.insert(Point::new(p.x-1, p.y));
+        }
+
+        // DOWN
+        if b.get(p.x, p.y+1) == BoardState::Empty {
+            adj.insert(Point::new(p.x,p.y+1));
+        }
+        
+        // RIGHT
+        if b.get(p.x+1, p.y) == BoardState::Empty {
+            adj.insert(Point::new(p.x+1,p.y));
+        }
+
+        adj
+    }
+
+    fn get_all_adjacent(p: Point, b: &Board) -> HashSet<Point> {
+        let mut region = HashSet::new();
+        
+        if b.get(p.x, p.y) != BoardState::Empty {
+            return region;
+        }
+
+        let mut pending : VecDeque<Point> = VecDeque::new();
+
+        pending.push_back(p);
+
+        while !pending.is_empty() {
+            // Get the first element. If it's not already in the region,
+            // add it and add its adj elements to pending
+            if let Some(next_p) = pending.pop_front() {
+                if !region.contains(&next_p) {
+                    region.insert(next_p);
+
+                    for adjp in get_adjacent(next_p, b) {
+                        pending.push_back(adjp);
+                    }
+                }
+            }
+        }
+        
+        region
     }
 }
