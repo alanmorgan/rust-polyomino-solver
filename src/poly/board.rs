@@ -29,12 +29,12 @@ impl<'a> fmt::Display for Board<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 
         fn print_top_row_border(s: &Board, f: &mut fmt::Formatter) {
-            let _ = write!(f, "+");
+            let _ = f.write_str("+");
 
             for x in 0 .. s.width {
                 let piece = s.get(x, 0);
                 
-                let _ = write!(f, "{}", if piece == BoardState::Void {
+                let _ = f.write_str(if piece == BoardState::Void {
                     if s.get(x+1, 0) == BoardState::Void {
                         "  "
                     } else {
@@ -45,7 +45,7 @@ impl<'a> fmt::Display for Board<'a> {
                 });
             }
 
-            let _ = writeln!(f, "");
+            let _ = f.write_str("");
         }
         
         fn print_row(s: &Board, f: &mut fmt::Formatter, y: usize) {
@@ -53,34 +53,34 @@ impl<'a> fmt::Display for Board<'a> {
                 let piece = s.get(x, y);
                 
                 if x == 0 {
-                    let _ = write!(f, "{}", if piece == BoardState::Void {
+                    let _ = f.write_str(if piece == BoardState::Void {
                         " "
                     } else {
                         "|"
                     });
                 }
 
-                let _ = write!(f, "{}", rep(&piece));
+                let _ = f.write_str(&rep(&piece).to_string());
 
-                let _ = write!(f, "{}", if piece == s.get(x+1, y) {
+                let _ = f.write_str(if piece == s.get(x+1, y) {
                     " "
                 } else {
                     "|"
                 });
             }
 
-            let _ = writeln!(f, "");
+            let _ = f.write_str("");
 
             print_row_bottom_border(s, f, y);
         }
         
         fn print_row_bottom_border(s: &Board, f: &mut fmt::Formatter, y: usize) {
-            let _ = write!(f, "+");
+            let _ = f.write_str("+");
 
             for x in 0 .. s.width {
                 let piece = s.get(x, y);
                 
-                let _ = write!(f, "{}", if piece == s.get(x, y+1) {
+                let _ = f.write_str(if piece == s.get(x, y+1) {
                     if piece == s.get(x+1, y) && s.get(x, y+1) == s.get(x+1, y+1) {
                         "  "
                     } else {
@@ -91,7 +91,7 @@ impl<'a> fmt::Display for Board<'a> {
                 });
             }
 
-            let _ = writeln!(f, "");
+            let _ = f.write_str("");
         }
 
         
@@ -101,7 +101,7 @@ impl<'a> fmt::Display for Board<'a> {
             print_row(self, f, y);
         }
 
-        write!(f, "")
+        f.write_str("")
     }
 
 }
