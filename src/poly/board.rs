@@ -45,7 +45,7 @@ impl<'a> fmt::Display for Board<'a> {
                 });
             }
 
-            let _ = f.write_str("");
+            let _ = f.write_str("\n");
         }
         
         fn print_row(s: &Board, f: &mut fmt::Formatter, y: usize) {
@@ -69,7 +69,7 @@ impl<'a> fmt::Display for Board<'a> {
                 });
             }
 
-            let _ = f.write_str("");
+            let _ = f.write_str("\n");
 
             print_row_bottom_border(s, f, y);
         }
@@ -91,7 +91,7 @@ impl<'a> fmt::Display for Board<'a> {
                 });
             }
 
-            let _ = f.write_str("");
+            let _ = f.write_str("\n");
         }
 
         
