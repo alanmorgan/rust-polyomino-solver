@@ -38,6 +38,7 @@ impl<'a> Iterator for PolyominoIterator<'a> {
 impl Polyomino {
     pub fn new(mut p: Vec<Point>) -> Polyomino {
         p.sort();
+        p.dedup();
         Polyomino { points: p }
     }
     

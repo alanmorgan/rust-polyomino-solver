@@ -41,6 +41,29 @@ fn make_simple_polyomino() -> Polyomino {
     Polyomino::new(v)
 }
 
+fn make_simple_polyomino_2() -> Polyomino {
+    let mut v = Vec::new();
+    v.push(Point::new(0,1));
+    v.push(Point::new(1,1));
+    v.push(Point::new(1,0));
+    v.push(Point::new(2,2));
+    v.push(Point::new(1,2));
+    
+    Polyomino::new(v)
+}
+
+fn make_simple_polyomino_3() -> Polyomino {
+    let mut v = Vec::new();
+    v.push(Point::new(0,1));
+    v.push(Point::new(1,1));
+    v.push(Point::new(1,0));
+    v.push(Point::new(2,2));
+    v.push(Point::new(2,2));
+    v.push(Point::new(1,2));
+    
+    Polyomino::new(v)
+}
+
 #[test]
 fn make_polys () {
     let p = make_simple_polyomino();
@@ -49,6 +72,16 @@ fn make_polys () {
     assert!(p != p.rotate());
     assert_eq!(p, p.rotate().rotate().rotate().rotate());
 
+}
+
+#[test]
+fn compare_polys () {
+    let p = make_simple_polyomino();
+    let p2 = make_simple_polyomino_2();
+    let p3 = make_simple_polyomino_3();
+
+    assert_eq!(p, p2);
+    assert_eq!(p, p3);
 }
 
 #[test]
