@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 mod poly;
 
 use poly::polyomino::Polyomino;
@@ -33,14 +31,14 @@ fn main() {
 }
 
 fn make_simple_polyomino() -> Polyomino {
-    let mut s = HashSet::new();
-    s.insert(Point::new(0,1));
-    s.insert(Point::new(1,0));
-    s.insert(Point::new(1,1));
-    s.insert(Point::new(1,2));
-    s.insert(Point::new(2,2));
+    let mut v = Vec::new();
+    v.push(Point::new(0,1));
+    v.push(Point::new(1,0));
+    v.push(Point::new(1,1));
+    v.push(Point::new(1,2));
+    v.push(Point::new(2,2));
     
-    Polyomino::new(s)
+    Polyomino::new(v)
 }
 
 #[test]

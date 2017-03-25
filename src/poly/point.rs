@@ -1,7 +1,29 @@
+use std::cmp::Ordering;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Point {
     pub x: usize,
     pub y: usize
+}
+
+impl Ord for Point {
+    fn cmp(&self, other: &Point) -> Ordering {
+        if self.x < other.x {
+            return Ordering::Less;
+        }
+
+        if self.x > other.x {
+            return Ordering::Greater;
+        }
+
+        self.y.cmp(&other.y)
+    }
+}
+
+impl PartialOrd for Point {
+    fn partial_cmp(&self, other: &Point) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 #[allow(dead_code)]

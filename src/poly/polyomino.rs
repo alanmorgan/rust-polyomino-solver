@@ -1,13 +1,12 @@
 use std::cmp;
-use std::collections::HashSet;
-use std::collections::hash_set::Iter;
+use std::slice::Iter;
 
 use poly::point::Point;
 
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct Polyomino {
-    points: HashSet<Point>
+    points: Vec<Point>
 }
 
 impl PartialEq for Polyomino {
@@ -37,7 +36,8 @@ impl<'a> Iterator for PolyominoIterator<'a> {
 
 #[allow(dead_code)]
 impl Polyomino {
-    pub fn new(p: HashSet<Point>) -> Polyomino {
+    pub fn new(mut p: Vec<Point>) -> Polyomino {
+        p.sort();
         Polyomino { points: p }
     }
     
