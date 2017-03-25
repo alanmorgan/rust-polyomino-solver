@@ -30,6 +30,7 @@ fn main() {
     }
 }
 
+#[allow(dead_code)]
 fn make_simple_polyomino() -> Polyomino {
     let mut v = Vec::new();
     v.push(Point::new(0,1));
@@ -41,6 +42,7 @@ fn make_simple_polyomino() -> Polyomino {
     Polyomino::new(v)
 }
 
+#[allow(dead_code)]
 fn make_simple_polyomino_2() -> Polyomino {
     let mut v = Vec::new();
     v.push(Point::new(0,1));
@@ -52,6 +54,7 @@ fn make_simple_polyomino_2() -> Polyomino {
     Polyomino::new(v)
 }
 
+#[allow(dead_code)]
 fn make_simple_polyomino_3() -> Polyomino {
     let mut v = Vec::new();
     v.push(Point::new(0,1));

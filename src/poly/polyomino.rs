@@ -3,7 +3,7 @@ use std::slice::Iter;
 
 use poly::point::Point;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Clone)]
 #[allow(dead_code)]
 pub struct Polyomino {
     points: Vec<Point>
