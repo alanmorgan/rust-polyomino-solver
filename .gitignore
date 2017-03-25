@@ -4,6 +4,9 @@
 *.rlib
 *.dll
 
+# emacs tmp files
+\#*\#
+
 # Executables
 *.exe
 
