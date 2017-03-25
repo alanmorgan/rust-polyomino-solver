@@ -20,6 +20,9 @@ impl PartialEq for Polyomino {
     }
 }
 
+impl Eq for Polyomino {
+}
+
 pub struct PolyominoIterator<'a> {
     i : Iter<'a, Point>
 }
