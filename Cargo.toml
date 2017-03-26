@@ -7,7 +7,3 @@ authors = ["amorgan"]
 num="*"
 byteorder="*"
 rand="*"
-
-#[dependencies.ndarray]
-#git="https://github.com/bluss/rust-ndarray.git"
-#branch="master"
