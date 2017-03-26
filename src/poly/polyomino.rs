@@ -80,3 +80,49 @@ impl Polyomino {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use Point;
+    use Polyomino;
+
+    fn build_f_polyomino() -> Polyomino {
+        let mut v = Vec::new();
+        v.push(Point::new(0,1));
+        v.push(Point::new(1,1));
+        v.push(Point::new(1,0));
+        v.push(Point::new(2,2));
+        v.push(Point::new(1,2));
+        
+        Polyomino::new(v)
+    }
+
+    // Add points in different order, with duplicate
+    fn build_alt_f_polyomino() -> Polyomino {
+        let mut v = Vec::new();
+        v.push(Point::new(2,2));
+        v.push(Point::new(1,0));
+        v.push(Point::new(1,2));
+        v.push(Point::new(1,0));
+        v.push(Point::new(1,1));
+        v.push(Point::new(0,1));
+        
+        Polyomino::new(v)
+    }
+
+    #[test]
+    fn count() {
+        assert_eq!(build_f_polyomino().iter().count(), 5);
+    }
+
+    #[test]
+    fn rot() {
+        let f = build_f_polyomino();
+        let f_alt = build_alt_f_polyomino();
+
+        assert!(f == f);
+        assert!(f == f_alt);
+        assert!(f != f.rotate());
+        assert!(f == f.rotate().rotate().rotate().rotate());
+        assert!(f.rotate().rotate().flip() == f.flip().rotate().rotate());
+    }
+}
