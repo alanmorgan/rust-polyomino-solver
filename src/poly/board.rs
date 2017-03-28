@@ -101,7 +101,7 @@ impl<'a> fmt::Display for Board<'a> {
             try!(print_row(self, f, y));
         }
 
-        f.write_str("")
+        Ok(())
     }
 
 }
