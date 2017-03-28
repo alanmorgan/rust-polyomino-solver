@@ -1,4 +1,6 @@
+use std::fmt;
 use std::cmp;
+use std::collections::HashSet;
 use std::slice::Iter;
 
 use poly::point::Point;
@@ -67,12 +69,12 @@ impl Polyomino {
 
     pub fn rotate(&self) -> Polyomino {
         let height = self.top_right().y;
-        Polyomino { points: self.points.iter().map(|p| Point {x: height-p.y, y: p.x}).collect() }
+        Polyomino::new(self.points.iter().map(|p| Point {x: height-p.y, y: p.x}).collect())
     }
 
     pub fn flip(&self) -> Polyomino {
         let width = self.top_right().x;
-        Polyomino { points: self.points.iter().map(|p| Point {x: width-p.x, y: p.y}).collect() }
+        Polyomino::new(self.points.iter().map(|p| Point {x: width-p.x, y: p.y}).collect())
     }
 
     pub fn iter(&self) -> PolyominoIterator {
@@ -80,12 +82,39 @@ impl Polyomino {
     }
 }
 
+impl fmt::Display for Polyomino {
+    fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
+        for p in self.points.iter() {
+            try!(write!(f, "{:?}\n", p));
+        }
+
+        Ok(())
+    }
+}
+
+pub fn make_variations(p: Polyomino) -> HashSet<Polyomino> {
+    let mut res = HashSet::new();
+
+    res.insert(p.clone());
+    res.insert(p.clone().rotate());
+    res.insert(p.clone().rotate().rotate());
+    res.insert(p.clone().rotate().rotate().rotate());
+
+    res.insert(p.clone().flip());
+    res.insert(p.clone().flip().rotate());
+    res.insert(p.clone().flip().rotate().rotate());
+    res.insert(p.clone().flip().rotate().rotate().rotate());
+
+    res
+}
+
 #[cfg(test)]
 mod tests {
     use Point;
     use Polyomino;
+    use poly::polyomino::make_variations;
 
-    fn build_f_polyomino() -> Polyomino {
+    fn build_f_pentomino() -> Polyomino {
         let mut v = Vec::new();
         v.push(Point::new(0,1));
         v.push(Point::new(1,1));
@@ -97,7 +126,7 @@ mod tests {
     }
 
     // Add points in different order, with duplicate
-    fn build_alt_f_polyomino() -> Polyomino {
+    fn build_alt_f_pentomino() -> Polyomino {
         let mut v = Vec::new();
         v.push(Point::new(2,2));
         v.push(Point::new(1,0));
@@ -109,20 +138,65 @@ mod tests {
         Polyomino::new(v)
     }
 
+    fn build_i_pentomino() -> Polyomino {
+        let mut v = Vec::new();
+        v.push(Point::new(0,0));
+        v.push(Point::new(0,1));
+        v.push(Point::new(0,2));
+        v.push(Point::new(0,3));
+        v.push(Point::new(0,4));
+
+        Polyomino::new(v)
+    }
+
+    fn build_alt_i_pentomino() -> Polyomino {
+        let mut v = Vec::new();
+        v.push(Point::new(0,4));
+        v.push(Point::new(0,3));
+        v.push(Point::new(0,2));
+        v.push(Point::new(0,1));
+        v.push(Point::new(0,0));
+
+        Polyomino::new(v)
+    }
+
+    fn build_v_pentomino() -> Polyomino {
+        let mut v = Vec::new();
+        v.push(Point::new(0,0));
+        v.push(Point::new(0,1));
+        v.push(Point::new(0,2));
+        v.push(Point::new(1,0));
+        v.push(Point::new(2,0));
+
+        Polyomino::new(v)
+    }
+
     #[test]
     fn count() {
-        assert_eq!(build_f_polyomino().iter().count(), 5);
+        assert_eq!(build_f_pentomino().iter().count(), 5);
     }
 
     #[test]
     fn rot() {
-        let f = build_f_polyomino();
-        let f_alt = build_alt_f_polyomino();
+        let f = build_f_pentomino();
+        let f_alt = build_alt_f_pentomino();
+        let i = build_i_pentomino();
+        let i_alt = build_alt_i_pentomino();
 
         assert!(f == f);
         assert!(f == f_alt);
+        assert!(i == i_alt);
+        assert!(i == i.rotate().rotate());
+        assert!(i == i.flip());
         assert!(f != f.rotate());
         assert!(f == f.rotate().rotate().rotate().rotate());
         assert!(f.rotate().rotate().flip() == f.flip().rotate().rotate());
+    }
+
+    #[test]
+    fn variations() {
+        assert_eq!(make_variations(build_f_pentomino()).len(), 8);
+        assert_eq!(make_variations(build_i_pentomino()).len(), 2);
+        assert_eq!(make_variations(build_v_pentomino()).len(), 4);
     }
 }
