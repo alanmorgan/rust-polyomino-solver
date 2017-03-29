@@ -80,39 +80,47 @@ impl Polyomino {
     pub fn iter(&self) -> PolyominoIterator {
         PolyominoIterator { i: self.points.iter() }
     }
+
+    pub fn make_variations(&self) -> HashSet<Polyomino> {
+        let mut res = HashSet::new();
+        
+        res.insert(self.clone());
+        res.insert(self.clone().rotate());
+        res.insert(self.clone().rotate().rotate());
+        res.insert(self.clone().rotate().rotate().rotate());
+        
+        res.insert(self.clone().flip());
+        res.insert(self.clone().flip().rotate());
+        res.insert(self.clone().flip().rotate().rotate());
+        res.insert(self.clone().flip().rotate().rotate().rotate());
+        
+        res
+    }
 }
 
 impl fmt::Display for Polyomino {
     fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
-        for p in self.points.iter() {
-            try!(write!(f, "{:?}\n", p));
+        // Inefficient, but it hardly matters
+        let Point { x: width, y: height } = self.top_right();
+        for y in 0..height+1 {
+            for x in 0..width+1 {
+                if let Some(_p) = self.points.iter().find(|ref p| p.x == x && p.y == (height-y)) {
+                    try!(write!(f, "X"));
+                } else {
+                    try!(write!(f, " "));
+                }
+            }
+            try!(writeln!(f, ""));
         }
 
         Ok(())
     }
 }
 
-pub fn make_variations(p: Polyomino) -> HashSet<Polyomino> {
-    let mut res = HashSet::new();
-
-    res.insert(p.clone());
-    res.insert(p.clone().rotate());
-    res.insert(p.clone().rotate().rotate());
-    res.insert(p.clone().rotate().rotate().rotate());
-
-    res.insert(p.clone().flip());
-    res.insert(p.clone().flip().rotate());
-    res.insert(p.clone().flip().rotate().rotate());
-    res.insert(p.clone().flip().rotate().rotate().rotate());
-
-    res
-}
-
 #[cfg(test)]
 mod tests {
     use Point;
     use Polyomino;
-    use poly::polyomino::make_variations;
 
     fn build_f_pentomino() -> Polyomino {
         let mut v = Vec::new();
@@ -195,8 +203,8 @@ mod tests {
 
     #[test]
     fn variations() {
-        assert_eq!(make_variations(build_f_pentomino()).len(), 8);
-        assert_eq!(make_variations(build_i_pentomino()).len(), 2);
-        assert_eq!(make_variations(build_v_pentomino()).len(), 4);
+        assert_eq!(build_f_pentomino().make_variations().len(), 8);
+        assert_eq!(build_i_pentomino().make_variations().len(), 2);
+        assert_eq!(build_v_pentomino().make_variations().len(), 4);
     }
 }
