@@ -187,3 +187,27 @@ pub fn build_pentominoes() -> Vec<Polyomino> {
 
     r
 }
+
+#[cfg(test)]
+mod tests
+{
+    use utils::*;
+
+    #[test]
+    fn count_tetrominoes() {
+        let mut i = 0;
+        for p in build_tetrominoes() {
+            i += p.make_variations().len();
+        }
+        assert_eq!(i, 19);
+    }
+
+    #[test]
+    fn count_pentominoes() {
+        let mut i = 0;
+        for p in build_pentominoes() {
+            i += p.make_variations().len();
+        }
+        assert_eq!(i, 63);
+    }
+}
