@@ -1,9 +1,10 @@
 mod poly;
 
-use poly::polyomino::Polyomino;
-use poly::point::Point;
 use poly::board::Board;
 use poly::board::board_utils;
+use poly::point::Point;
+use poly::polyomino::Polyomino;
+use poly::utils;
 
 fn main() {
     let p = make_simple_polyomino();
@@ -27,6 +28,10 @@ fn main() {
     println!("Adjacent to 4,0");
     for p in adj {
         println!("{}, {}", p.x, p.y);
+    }
+
+    for p in utils::build_pentominoes() {
+        println!("{}", p);
     }
 }
 
