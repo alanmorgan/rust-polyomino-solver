@@ -44,17 +44,14 @@ impl Polyomino {
         Polyomino { points: p }
     }
     
-    pub fn top_right(&self) -> Point {
+    // The largest x and y in the set of points. Note: this point may not be in the polyomino
+    fn bbox_top_right(&self) -> Point {
         self.points.iter().fold(Point::min_point(), |a, ref p| Point { x: cmp::max(a.x, p.x), y: cmp::max(a.y, p.y) })
     }
     
-    pub fn bottom_left(&self) -> Point {
-        self.points.iter().fold(Point::max_point(), |a, ref p| Point { x: cmp::min(a.x, p.x), y: cmp::min(a.y, p.y) })
-    }
-
     pub fn show(&self) {
         // Inefficient, but it hardly matters
-        let Point { x: width, y: height } = self.top_right();
+        let Point { x: width, y: height } = self.bbox_top_right();
         for y in 0..height+1 {
             for x in 0..width+1 {
                 if let Some(_p) = self.points.iter().find(|ref p| p.x == x && p.y == (height-y)) {
@@ -68,12 +65,12 @@ impl Polyomino {
     }
 
     pub fn rotate(&self) -> Polyomino {
-        let height = self.top_right().y;
+        let height = self.bbox_top_right().y;
         Polyomino::new(self.points.iter().map(|p| Point {x: height-p.y, y: p.x}).collect())
     }
 
     pub fn flip(&self) -> Polyomino {
-        let width = self.top_right().x;
+        let width = self.bbox_top_right().x;
         Polyomino::new(self.points.iter().map(|p| Point {x: width-p.x, y: p.y}).collect())
     }
 
@@ -101,7 +98,7 @@ impl Polyomino {
 impl fmt::Display for Polyomino {
     fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
         // Inefficient, but it hardly matters
-        let Point { x: width, y: height } = self.top_right();
+        let Point { x: width, y: height } = self.bbox_top_right();
         for y in 0..height+1 {
             for x in 0..width+1 {
                 if let Some(_p) = self.points.iter().find(|ref p| p.x == x && p.y == (height-y)) {
