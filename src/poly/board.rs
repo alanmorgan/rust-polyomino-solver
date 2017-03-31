@@ -145,7 +145,7 @@ impl<'a> Board<'a> {
         true
     }
 
-    pub fn on_board(&self, x: usize, y: usize) -> bool {
+    fn on_board(&self, x: usize, y: usize) -> bool {
         x < self.width && y < self.height
     }
     
