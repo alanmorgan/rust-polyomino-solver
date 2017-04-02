@@ -321,6 +321,17 @@ mod tests {
         
         Polyomino::new(p)
     }
+
+    fn build_i() -> Polyomino {
+        let mut p = Vec::new();
+        p.push(Point::new(0, 0));
+        p.push(Point::new(0, 1));
+        p.push(Point::new(0, 2));
+        p.push(Point::new(0, 3));
+        p.push(Point::new(0, 4));
+        
+        Polyomino::new(p)
+    }
     
     fn build_y() -> Polyomino {
         let mut p = Vec::new();
@@ -338,13 +349,24 @@ mod tests {
         let w = build_w();
         let l = build_l();
         let l_rot = l.rotate();
+        let i = build_i();
         let y = build_y();
-        
+    
+        // Fit does require a particular point ordering, so let's test that here.
+        // We also test it in Point
+        let p00 = Point::new(0,0);
+        let p07 = Point::new(0,7);
+        let p10 = Point::new(1,0);
+
+        assert!(p00 < p07);
+        assert!(p10 > p07);
+
         let mut b = Board::new(6, 10);
         assert!(!board_utils::fit(&mut b, &y));
         assert!(board_utils::fit(&mut b, &w));
         assert!(!board_utils::fit(&mut b, &l_rot));
         assert!(board_utils::fit(&mut b, &l));
+        assert!(!board_utils::fit(&mut b, &i));
         assert!(board_utils::fit(&mut b, &y));
 
         assert!(b.get(0,0) == BoardState::Full(&w));
