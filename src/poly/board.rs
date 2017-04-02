@@ -11,12 +11,21 @@ pub enum BoardState<'a> {
      Full(& 'a Polyomino)  // Has a piece
 }
 
-fn rep(b : &BoardState) -> char {
-    match *b {
-        BoardState::Void => ' ',
-        BoardState::Empty => '.',
-        BoardState::Full(_p) => 'X'
+impl<'a> fmt::Display for BoardState<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(self.rep())
     }
+}
+
+impl<'a> BoardState<'a> {
+    pub fn rep(&self) -> &str {
+        match *self {
+            BoardState::Void => " ",
+            BoardState::Empty => ".",
+            BoardState::Full(_p) => "X"
+        }
+    }
+
 }
 
 pub struct Board<'a> {
@@ -60,7 +69,7 @@ impl<'a> fmt::Display for Board<'a> {
                     }));
                 }
 
-                try!(f.write_str(&rep(&piece).to_string()));
+                try!(f.write_str(piece.rep()));
 
                 try!(f.write_str(if piece == s.get(x+1, y) {
                     " "
@@ -162,6 +171,7 @@ pub mod board_utils {
     use poly::board::Board;
     use poly::board::BoardState;
     use poly::point::Point;
+    use poly::polyomino::Polyomino;
     
     use std::collections::HashSet;
     use std::collections::VecDeque;
@@ -230,5 +240,119 @@ pub mod board_utils {
         }
         
         region
+    }
+
+    pub fn fit<'a>(b: &mut Board<'a>, p: &'a Polyomino) -> bool {
+        /* Attempt to fit the polyomino at the first unoccuped spot on the board.
+        
+        Consider the board with the first unoccupied spot marked with a '.'
+        
+        +-+-+-+-+-+
+        | | | | | |
+        +-+-+-+-+-+
+        |.| | | | |
+        +-+-+-+-+-+
+        |X| | | | |
+        +-+-+-+-+-+
+        |X|X|X| | |
+        +-+-+-+-+-+
+        
+        And the polyomino
+        
+         x
+        xxx
+         x
+        
+        To fit this on the board we don't put the (0,0) point of the polyomino on A, we try to put the
+        first point (0, 1) on A. This gives us the best possible fit.
+        
+        +-+-+-+-+-+
+        | |X| | | |
+        +-+-+-+-+-+
+        |X|X|X| | |
+        +-+-+-+-+-+
+        |X|X| | | |
+        +-+-+-+-+-+
+        |X|X|X| | |
+        +-+-+-+-+-+
+        
+        Find the first point of polyomino (this relies on the Point ordering being sane, which it is) and
+        shift the polyomino so that it's at the right position
+         */
+        
+        if let Some(target_pt) = get_first_unoccupied(&b) {
+            if let Some(poly_pt) = p.iter().nth(0) {
+                if poly_pt.x <= target_pt.x && poly_pt.y <= target_pt.y {
+                    return b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y));
+                }
+            }
+        }
+        
+        false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use poly::board::Board;
+    use poly::board::BoardState;
+    use poly::board::board_utils;
+    use poly::point::Point;
+    use poly::polyomino::Polyomino;
+
+    fn build_w() -> Polyomino {
+        let mut p = Vec::new();
+        p.push(Point::new(0, 0));
+        p.push(Point::new(1, 0));
+        p.push(Point::new(1, 1));
+        p.push(Point::new(2, 1));
+        p.push(Point::new(2, 2));
+        
+        Polyomino::new(p)
+    }
+    
+    fn build_l() -> Polyomino {
+        let mut p = Vec::new();
+        p.push(Point::new(0, 0));
+        p.push(Point::new(0, 1));
+        p.push(Point::new(0, 2));
+        p.push(Point::new(0, 3));
+        p.push(Point::new(1, 3));
+        
+        Polyomino::new(p)
+    }
+    
+    fn build_y() -> Polyomino {
+        let mut p = Vec::new();
+        p.push(Point::new(0, 1));
+        p.push(Point::new(1, 1));
+        p.push(Point::new(2, 1));
+        p.push(Point::new(3, 1));
+        p.push(Point::new(2, 0));
+        
+        Polyomino::new(p)
+    }
+    
+    #[test]
+    fn test_fit() {
+        let w = build_w();
+        let l = build_l();
+        let l_rot = l.rotate();
+        let y = build_y();
+        
+        let mut b = Board::new(6, 10);
+        assert!(!board_utils::fit(&mut b, &y));
+        assert!(board_utils::fit(&mut b, &w));
+        assert!(!board_utils::fit(&mut b, &l_rot));
+        assert!(board_utils::fit(&mut b, &l));
+        assert!(board_utils::fit(&mut b, &y));
+
+        assert!(b.get(0,0) == BoardState::Full(&w));
+        assert!(b.get(0,0) != b.get(0,1));
+        assert!(b.get(0,0) == b.get(1,0));
+        assert!(b.get(0,1) == b.get(0,2));
+        assert!(b.get(0,5) != b.get(0,4));
+        assert!(b.get(0,5) == b.get(2,4));
+        assert!(b.get(2,0) == BoardState::Empty);
     }
 }
