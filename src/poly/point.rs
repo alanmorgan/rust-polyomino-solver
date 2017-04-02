@@ -49,19 +49,15 @@ mod tests {
 
     #[test]
     fn ord() {
-        let p00 = Point {x:0, y:0};
-        let p01 = Point {x:0, y:1};
-        let p10 = Point {x:1, y:0};
-        let p11 = Point {x:1, y:1};
+        let p00 = Point::new(0, 0);
+        let p07 = Point::new(0, 7);
+        let p10 = Point::new(1, 0);
+        let p16 = Point::new(1, 6);
         
-        let p11_new = Point::new(1, 1);
-
-        assert_eq!(p00.cmp(&p01), Ordering::Less);
-        assert_eq!(p01.cmp(&p00), Ordering::Greater);
-        assert_eq!(p01.cmp(&p11), Ordering::Less);
-        assert_eq!(p10.cmp(&p11), Ordering::Less);
-        assert_eq!(p00.cmp(&p00), Ordering::Equal);
-
-        assert_eq!(p11.cmp(&p11_new), Ordering::Equal);
+        assert!(p00 < p07);
+        assert!(p07 > p00);
+        assert!(p07 < p10);
+        assert!(p07 < p16);
+        assert!(p07 == p07);
     }
 }
