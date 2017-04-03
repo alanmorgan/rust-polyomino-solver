@@ -123,20 +123,18 @@ impl<'a> Board<'a> {
                 board: vec![BoardState::Empty; h*w] }
     }
 
-    fn set(&mut self, x: usize, y: usize, polyomino: &'a Polyomino) -> bool {
-        let idx = x + y * self.width;
-        
-        if self.on_board(x, y) && self.board[idx] == BoardState::Empty {
-            self.board[idx] = BoardState::Full(polyomino);
-            return true
-        }
+    fn to_idx (&self, x: usize, y: usize) -> usize {
+        x + y * self.width
+    }
 
-        false
+    fn set(&mut self, x: usize, y: usize, state: BoardState<'a>) {
+        let idx = self.to_idx(x, y);
+        self.board[idx] = state;
     }
 
     pub fn get(&self, x: usize, y: usize) -> BoardState<'a> {
         if self.on_board(x, y) {
-            return self.board[x + y * self.width];
+            return self.board[self.to_idx(x, y)];
         }
         
         BoardState::Void
@@ -148,12 +146,31 @@ impl<'a> Board<'a> {
         }
 
         for pt in p.iter() {
-           self.set(pt.x + ll.x, pt.y + ll.y, p); 
+            let new_x = pt.x + ll.x;
+            let new_y = pt.y + ll.y;
+
+            let idx = self.to_idx(new_x, new_y);
+
+            if self.on_board(new_x, new_y) && self.board[idx] == BoardState::Empty {
+                self.board[idx] = BoardState::Full(p);
+            }
         }
         
         true
     }
 
+    pub fn remove_polyomino(&mut self, ll: Point) {
+        if let BoardState::Full(p) = self.get(ll.x, ll.y) {
+            for r in self.row_range() {
+                for c in self.col_range() {
+                    if self.get(r, c) == BoardState::Full(p) {
+                        self.set(r, c, BoardState::Empty);
+                    }
+                }
+            }
+        }
+    }
+    
     fn on_board(&self, x: usize, y: usize) -> bool {
         x < self.width && y < self.height
     }
@@ -342,6 +359,23 @@ mod tests {
         p.push(Point::new(2, 0));
         
         Polyomino::new(p)
+    }
+
+    #[test]
+    fn test_add_remove() {
+        let w = build_w();
+        let l = build_l();
+
+        let mut b = Board::new(5,12);
+        b.add_polyomino(&w, Point::new(0, 0));
+        b.add_polyomino(&l, Point::new(4, 0));
+        assert!(b.get(0, 0) == BoardState::Full(&w));
+        assert!(b.get(4, 0) == BoardState::Full(&l));
+        b.remove_polyomino(Point::new(0, 0));
+        assert!(b.get(0, 0) == BoardState::Empty);
+        assert!(b.get(4, 0) == BoardState::Full(&l));
+        b.remove_polyomino(Point::new(4, 0));
+        assert!(b.get(4, 0) == BoardState::Empty);
     }
     
     #[test]
