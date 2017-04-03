@@ -116,7 +116,7 @@ impl fmt::Display for Polyomino {
 
 #[cfg(test)]
 mod tests {
-    use Point;
+    use poly::point::Point;
     use Polyomino;
 
     fn build_f_pentomino() -> Polyomino {

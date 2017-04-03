@@ -45,7 +45,7 @@ impl Point {
 #[cfg(test)]
 mod tests {
     use std::cmp::Ordering;
-    use Point;
+    use poly::point::Point;
 
     #[test]
     fn ord() {
