@@ -146,14 +146,7 @@ impl<'a> Board<'a> {
         }
 
         for pt in p.iter() {
-            let new_x = pt.x + ll.x;
-            let new_y = pt.y + ll.y;
-
-            let idx = self.to_idx(new_x, new_y);
-
-            if self.on_board(new_x, new_y) && self.board[idx] == BoardState::Empty {
-                self.board[idx] = BoardState::Full(p);
-            }
+            self.set(pt.x + ll.x, pt.y + ll.y, BoardState::Full(p));
         }
         
         true
