@@ -4,11 +4,11 @@ use std::fmt;
 use poly::point::Point;
 use poly::polyomino::Polyomino;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum BoardState<'a> {
      Void,      // Out of bounds/a hole in the board
      Empty,     // A valid part of the board, but no piece is there
-     Full(& 'a Polyomino)  // Has a piece
+     Full(& 'a Polyomino, usize, usize)  // Has a piece
 }
 
 impl<'a> fmt::Display for BoardState<'a> {
@@ -22,7 +22,7 @@ impl<'a> BoardState<'a> {
         match *self {
             BoardState::Void => " ",
             BoardState::Empty => ".",
-            BoardState::Full(_p) => "X"
+            BoardState::Full(_p, _x, _y) => "X"
         }
     }
 
@@ -146,20 +146,16 @@ impl<'a> Board<'a> {
         }
 
         for pt in p.iter() {
-            self.set(pt.x + ll.x, pt.y + ll.y, BoardState::Full(p));
+            self.set(pt.x + ll.x, pt.y + ll.y, BoardState::Full(p, ll.x, ll.y));
         }
         
         true
     }
 
     pub fn remove_polyomino(&mut self, ll: Point) {
-        if let BoardState::Full(p) = self.get(ll.x, ll.y) {
-            for r in self.row_range() {
-                for c in self.col_range() {
-                    if self.get(r, c) == BoardState::Full(p) {
-                        self.set(r, c, BoardState::Empty);
-                    }
-                }
+        if let BoardState::Full(p, start_x, start_y) = self.get(ll.x, ll.y) {
+            for pt in p.iter() {
+                self.set(pt.x + start_x, pt.y + start_y, BoardState::Empty);
             }
         }
     }
@@ -362,12 +358,13 @@ mod tests {
         let mut b = Board::new(5,12);
         b.add_polyomino(&w, Point::new(0, 0));
         b.add_polyomino(&l, Point::new(4, 0));
-        assert!(b.get(0, 0) == BoardState::Full(&w));
-        assert!(b.get(4, 0) == BoardState::Full(&l));
-        b.remove_polyomino(Point::new(0, 0));
+        assert!(b.get(0, 0) == BoardState::Full(&w, 0, 0));
+        assert!(b.get(4, 0) == BoardState::Full(&l, 4, 0));
+        assert!(b.get(4, 3) == BoardState::Full(&l, 4, 0));
+        b.remove_polyomino(Point::new(1, 1));
         assert!(b.get(0, 0) == BoardState::Empty);
-        assert!(b.get(4, 0) == BoardState::Full(&l));
-        b.remove_polyomino(Point::new(4, 0));
+        assert!(b.get(4, 0) == BoardState::Full(&l, 4, 0));
+        b.remove_polyomino(Point::new(4, 2));
         assert!(b.get(4, 0) == BoardState::Empty);
     }
     
@@ -396,7 +393,7 @@ mod tests {
         assert!(!board_utils::fit(&mut b, &i));
         assert!(board_utils::fit(&mut b, &y));
 
-        assert!(b.get(0,0) == BoardState::Full(&w));
+        assert!(b.get(0,0) == BoardState::Full(&w, 0, 0));
         assert!(b.get(0,0) != b.get(0,1));
         assert!(b.get(0,0) == b.get(1,0));
         assert!(b.get(0,1) == b.get(0,2));
