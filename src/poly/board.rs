@@ -270,7 +270,7 @@ pub mod board_utils {
          x
         
         To fit this on the board we don't put the (0,0) point of the polyomino on A, we try to put the
-        first point (0, 1) on A. This gives us the best possible fit.
+        first occupied point in the polyomino, (0,1), on A. This gives us the best possible fit.
         
         +-+-+-+-+-+
         | |X| | | |
@@ -287,7 +287,7 @@ pub mod board_utils {
          */
         
         if let Some(target_pt) = get_first_unoccupied(&b) {
-            if let Some(poly_pt) = p.iter().nth(0) {
+            if let Some(poly_pt) = p.iter().next() {
                 if poly_pt.x <= target_pt.x && poly_pt.y <= target_pt.y {
                     return b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y));
                 }

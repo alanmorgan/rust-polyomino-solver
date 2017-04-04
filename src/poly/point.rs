@@ -34,11 +34,11 @@ impl Point {
     }
 
     pub fn max_point() -> Point {
-        Point { x: usize::max_value(), y: usize::max_value() }
+        Point::new(usize::max_value(), usize::max_value())
     }
     
     pub fn min_point() -> Point {
-        Point { x: 0, y: 0 }
+        Point::new(0,0)
     }
 }
 
