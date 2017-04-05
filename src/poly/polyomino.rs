@@ -24,18 +24,6 @@ impl PartialEq for Polyomino {
 impl Eq for Polyomino {
 }
 
-pub struct PolyominoIterator<'a> {
-    i : Iter<'a, Point>
-}
-
-impl<'a> Iterator for PolyominoIterator<'a> {
-    type Item = & 'a Point;
-    
-    fn next(&mut self) -> Option<& 'a Point> {
-        self.i.next()
-    }
-}
-
 #[allow(dead_code)]
 impl Polyomino {
     pub fn new(mut p: Vec<Point>) -> Polyomino {
@@ -74,8 +62,8 @@ impl Polyomino {
         Polyomino::new(self.points.iter().map(|p| Point {x: width-p.x, y: p.y}).collect())
     }
 
-    pub fn iter(&self) -> PolyominoIterator {
-        PolyominoIterator { i: self.points.iter() }
+    pub fn iter(&self) -> Iter<Point> {
+        self.points.iter()
     }
 
     pub fn make_variations(&self) -> HashSet<Polyomino> {
