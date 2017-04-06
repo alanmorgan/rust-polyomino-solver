@@ -248,7 +248,7 @@ pub mod board_utils {
         region
     }
 
-    pub fn fit<'a>(b: &mut Board<'a>, p: &'a Polyomino) -> bool {
+    pub fn fit<'a>(b: &mut Board<'a>, p: &'a Polyomino) -> Option<Point> {
         /* Attempt to fit the polyomino at the first unoccuped spot on the board.
         
         Consider the board with the first unoccupied spot marked with a '.'
@@ -289,12 +289,14 @@ pub mod board_utils {
         if let Some(target_pt) = get_first_unoccupied(&b) {
             if let Some(poly_pt) = p.iter().next() {
                 if poly_pt.x <= target_pt.x && poly_pt.y <= target_pt.y {
-                    return b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y));
+                    if b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y)) {
+                        return Some(Point::new(target_pt.x, target_pt.y));
+                    }
                 }
             }
         }
         
-        false
+        None
     }
 }
 
@@ -386,12 +388,12 @@ mod tests {
         assert!(p10 > p07);
 
         let mut b = Board::new(6, 10);
-        assert!(!board_utils::fit(&mut b, &y));
-        assert!(board_utils::fit(&mut b, &w));
-        assert!(!board_utils::fit(&mut b, &l_rot));
-        assert!(board_utils::fit(&mut b, &l));
-        assert!(!board_utils::fit(&mut b, &i));
-        assert!(board_utils::fit(&mut b, &y));
+        assert_eq!(board_utils::fit(&mut b, &y), None);
+        assert_eq!(board_utils::fit(&mut b, &w), Some(Point::new(0,0)));
+        assert_eq!(board_utils::fit(&mut b, &l_rot), None);
+        assert_eq!(board_utils::fit(&mut b, &l), Some(Point::new(0,1)));
+        assert_eq!(board_utils::fit(&mut b, &i), None);
+        assert_eq!(board_utils::fit(&mut b, &y), Some(Point::new(0,5)));
 
         assert!(b.get(0,0) == BoardState::Full(&w, 0, 0));
         assert!(b.get(0,0) != b.get(0,1));
