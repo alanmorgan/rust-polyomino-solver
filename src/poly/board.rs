@@ -20,7 +20,7 @@ impl<'a> fmt::Display for BoardState<'a> {
 impl<'a> BoardState<'a> {
     pub fn rep(&self) -> &str {
         match *self {
-            BoardState::Void => "X",
+            BoardState::Void => " ",
             BoardState::Empty => ".",
             BoardState::Full(_p, _x, _y) => " "
         }
@@ -125,6 +125,10 @@ impl<'a> Board<'a> {
 
     fn to_idx (&self, x: usize, y: usize) -> usize {
         x + y * self.width
+    }
+
+    pub fn erase(&mut self, x: usize, y:usize) {
+        self.set(x, y, BoardState::Void);
     }
 
     fn set(&mut self, x: usize, y: usize, state: BoardState<'a>) {
