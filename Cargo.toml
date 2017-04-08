@@ -7,3 +7,4 @@ authors = ["amorgan"]
 num="*"
 byteorder="*"
 rand="*"
+bit-vec="0.4.2"
