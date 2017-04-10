@@ -13,9 +13,9 @@ use poly::point::Point;
 use poly::utils;
 
 fn main() {
-    let pentominoes = utils::build_variations(&utils::build_pentominoes());
+    let pentominoes = utils::build_rect_variations(&utils::build_pentominoes());
 
-    let mut b = Board::new(3, 20);
+    let mut b = Board::new(5, 12);
 
     println!("{} solutions\n", fill(&mut b, &pentominoes));
 }
