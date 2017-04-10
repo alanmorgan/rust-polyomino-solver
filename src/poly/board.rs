@@ -38,7 +38,11 @@ impl<'a> fmt::Display for Board<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 
         fn print_top_row_border(s: &Board, f: &mut fmt::Formatter) -> fmt::Result {
-            try!(f.write_str("+"));
+            try!(f.write_str(if s.get(0,0) == BoardState::Void {
+                " " 
+            } else {
+                "+"
+            }));
 
             for x in 0 .. s.width {
                 let piece = s.get(x, 0);
@@ -84,7 +88,11 @@ impl<'a> fmt::Display for Board<'a> {
         }
         
         fn print_row_bottom_border(s: &Board, f: &mut fmt::Formatter, y: usize) -> fmt::Result {
-            try!(f.write_str("+"));
+            try!(f.write_str(if s.get(0,y) == BoardState::Void {
+                " " 
+            } else {
+                "+"
+            }));
 
             for x in 0 .. s.width {
                 let piece = s.get(x, y);

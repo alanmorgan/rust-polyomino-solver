@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use poly::point::Point;
 use poly::polyomino::Polyomino;
 
@@ -210,4 +212,15 @@ mod tests
         }
         assert_eq!(i, 63);
     }
+}
+
+
+pub fn build_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
+    let mut res = Vec::with_capacity(polys.len());
+
+    for p in polys {
+        res.push(p.make_all_variations());
+    }
+
+    res
 }

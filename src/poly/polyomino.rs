@@ -66,7 +66,18 @@ impl Polyomino {
         self.points.iter()
     }
 
-    pub fn make_variations(&self) -> HashSet<Polyomino> {
+    fn make_rotations(&self) -> HashSet<Polyomino> {
+        let mut res = HashSet::new();
+        
+        res.insert(self.clone());
+        res.insert(self.clone().rotate());
+        res.insert(self.clone().rotate().rotate());
+        res.insert(self.clone().rotate().rotate().rotate());
+
+        res
+    }
+
+    pub fn make_all_variations(&self) -> HashSet<Polyomino> {
         let mut res = HashSet::new();
         
         res.insert(self.clone());
@@ -188,8 +199,8 @@ mod tests {
 
     #[test]
     fn variations() {
-        assert_eq!(build_f_pentomino().make_variations().len(), 8);
-        assert_eq!(build_i_pentomino().make_variations().len(), 2);
-        assert_eq!(build_v_pentomino().make_variations().len(), 4);
+        assert_eq!(build_f_pentomino().make_all_variations().len(), 8);
+        assert_eq!(build_i_pentomino().make_all_variations().len(), 2);
+        assert_eq!(build_v_pentomino().make_all_variations().len(), 4);
     }
 }

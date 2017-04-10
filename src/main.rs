@@ -6,39 +6,32 @@ extern crate bit_vec;
 use bit_vec::BitVec;
 
 use poly::board::Board;
+use poly::board::BoardState;
 use poly::board::board_utils;
 use poly::polyomino::Polyomino;
 use poly::point::Point;
 use poly::utils;
 
 fn main() {
-    let pentominoes = build_variations(&utils::build_pentominoes());
+    let pentominoes = utils::build_variations(&utils::build_pentominoes());
+
     let mut b = Board::new(3, 20);
 
-    fill(&mut b, &pentominoes);
+    println!("{} solutions\n", fill(&mut b, &pentominoes));
 }
 
-fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>) {
-    let mut usable_candidates = BitVec::from_elem(candidates.len(), true);
+fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>) -> i32 {
+    let usable_candidates = BitVec::from_elem(candidates.len(), true);
     
-    fill_board(b, candidates, &usable_candidates);
+    fill_board(b, candidates, &usable_candidates)
 }
 
-fn build_variations(polys : &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
-    let mut res = Vec::with_capacity(polys.len());
-
-    for p in polys {
-        res.push(p.make_variations());
-    }
-
-    res
-}
-
-fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>, usable_candidates: &BitVec) {
+fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>, usable_candidates: &BitVec) -> i32 {
+    let mut total = 0;
 
     if usable_candidates.none() {
         println!("{}", b);
-        return;
+        return 1;
     }
 
     let mut uc = usable_candidates.clone();
@@ -57,10 +50,12 @@ fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>, u
         for poly in polys {
             if let Some(point) = board_utils::fit(b, &poly) {
                 uc.set(n, false);
-                fill_board(b, candidates, &uc);
+                total += fill_board(b, candidates, &uc);
                 uc.set(n, true);
                 b.remove_polyomino(point);
             }
         }
     }
+
+    total
 }
