@@ -1,4 +1,9 @@
 use std::collections::HashSet;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Error;
+use std::path::Path;
 
 use poly::point::Point;
 use poly::polyomino::Polyomino;
@@ -190,30 +195,6 @@ pub fn build_pentominoes() -> Vec<Polyomino> {
     r
 }
 
-#[cfg(test)]
-mod tests
-{
-    use utils::*;
-
-    #[test]
-    fn count_tetrominoes() {
-        let mut i = 0;
-        for p in build_tetrominoes() {
-            i += p.make_variations().len();
-        }
-        assert_eq!(i, 19);
-    }
-
-    #[test]
-    fn count_pentominoes() {
-        let mut i = 0;
-        for p in build_pentominoes() {
-            i += p.make_variations().len();
-        }
-        assert_eq!(i, 63);
-    }
-}
-
 
 // Build all variations of the polyominos (rotated and reflected)
 pub fn build_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
@@ -249,4 +230,97 @@ pub fn build_rect_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> 
     }
 
     res
+}
+
+pub fn read_polyomino_file(name: &str) -> Result<Vec<Polyomino>, Error> {
+    let mut res = Vec::new();
+
+    let f = try!(File::open(name));
+
+    let buff_file = BufReader::new(&f);
+
+    let mut count = 0;
+    let mut points = Vec::new();
+
+    for line in buff_file.lines() {
+        match line.unwrap().as_ref() {
+            // polyominoes are separated by empty lines.
+            "" => { res.push(Polyomino::new(points));
+                    points = Vec::new();
+                    count = 0;
+            },
+            // anything else is a definition
+            str => {
+                for (i, c) in str.chars().enumerate() {
+                    if c != ' ' {
+                        points.push(Point::new(count, i));
+                    }
+                }
+                count=count+1;
+            },
+        }
+    }
+
+    if !points.is_empty() {
+        res.push(Polyomino::new(points));
+    }
+
+    Ok(res)
+}
+
+#[cfg(test)]
+mod tests {
+    use utils::*;
+
+    #[test]
+    fn count_tetrominoes() {
+        let mut i = 0;
+        for p in build_tetrominoes() {
+            i += p.make_all_variations().len();
+        }
+        assert_eq!(i, 19);
+    }
+
+    #[test]
+    fn count_pentominoes() {
+        let mut i = 0;
+        for p in build_pentominoes() {
+            i += p.make_all_variations().len();
+        }
+        assert_eq!(i, 63);
+    }
+
+    #[test]
+    fn test_read() {
+        match read_polyomino_file("data/domino.txt") {
+            Ok(polys) => {
+                assert_eq!(polys.len(), 1);
+            },
+            Err(..) => assert!(false),
+        }
+        match read_polyomino_file("data/tetromino.txt") {
+            Ok(polys) => {
+                assert_eq!(polys.len(), 5);
+            },
+            Err(..) => assert!(false),
+        }
+        match read_polyomino_file("data/pentomino.txt") {
+            Ok(polys) => {
+                assert_eq!(polys.len(), 12);
+            },
+            Err(..) => assert!(false),
+        }
+        match read_polyomino_file("data/hexomino.txt") {
+            Ok(polys) => {
+                assert_eq!(polys.len(), 35);
+            },
+            Err(..) => assert!(false),
+        }
+        match read_polyomino_file("data/heptomino.txt") {
+            Ok(polys) => {
+                assert_eq!(polys.len(), 108);
+            },
+            Err(..) => assert!(false),
+        }
+    }
 }
