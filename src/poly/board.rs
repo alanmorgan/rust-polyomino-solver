@@ -125,7 +125,7 @@ impl<'a> fmt::Display for Board<'a> {
 
 #[allow(dead_code)]
 impl<'a> Board<'a> {
-    pub fn new(h: usize, w: usize) -> Board<'a> {
+    pub fn new(w: usize, h: usize) -> Board<'a> {
         Board { height: h,
                 width: w,
                 board: vec![BoardState::Empty; h*w] }
@@ -392,7 +392,7 @@ mod tests {
         let w = build_w();
         let l = build_l();
 
-        let mut b = Board::new(5,12);
+        let mut b = Board::new(12,5);
         b.add_polyomino(&w, Point::new(0, 0));
         b.add_polyomino(&l, Point::new(4, 0));
         assert!(b.get(0, 0) == BoardState::Full(&w, 0, 0));
@@ -426,7 +426,7 @@ mod tests {
         let y = build_y();
         let i = build_i();
     
-        let mut b = Board::new(3, 20);
+        let mut b = Board::new(20, 3);
         assert_eq!(board_utils::get_first_unoccupied(&b), Some(Point::new(0,0)));
         assert_eq!(board_utils::fit(&mut b, &y), None);
         assert_eq!(board_utils::fit(&mut b, &u), Some(Point::new(0,0)));
