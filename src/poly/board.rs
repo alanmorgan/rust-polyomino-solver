@@ -186,6 +186,9 @@ impl<'a> Board<'a> {
 }
 
 pub mod board_utils {
+    extern crate bit_vec;
+    use bit_vec::BitVec;
+
     use poly::board::Board;
     use poly::board::BoardState;
     use poly::point::Point;
@@ -310,6 +313,46 @@ pub mod board_utils {
         }
         
         None
+    }
+
+    pub fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>) -> i32 {
+        let usable_candidates = BitVec::from_elem(candidates.len(), true);
+        
+    fill_board(b, candidates, &usable_candidates)
+    }
+
+    fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>, usable_candidates: &BitVec) -> i32 {
+        let mut total = 0;
+        
+        if usable_candidates.none() {
+            // println!("{}", b);
+            return 1;
+        }
+        
+        let mut uc = usable_candidates.clone();
+        
+        let polys_with_index = usable_candidates.iter().
+            enumerate().
+            zip(candidates.iter()).
+            filter_map(|((n, b), polys)|
+                       if b {
+                           Some((n, polys))
+                       } else {
+                           None
+                       });
+        
+        for (n, polys) in polys_with_index {
+            for poly in polys {
+                if let Some(point) = fit(b, &poly) {
+                    uc.set(n, false);
+                    total += fill_board(b, candidates, &uc);
+                    uc.set(n, true);
+                    b.remove_polyomino(point);
+                }
+            }
+        }
+        
+        total
     }
 }
 
