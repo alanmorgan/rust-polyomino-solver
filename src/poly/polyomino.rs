@@ -208,31 +208,31 @@ mod tests {
         
     #[test]
     fn test_read() {
-        match read_polyomino_file("data/domino.txt") {
+        match read_polyomino_file("data/domino.poly") {
             Ok(polys) => {
                 assert_eq!(polys.len(), 1);
             },
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/tetromino.txt") {
+        match read_polyomino_file("data/tetromino.poly") {
             Ok(polys) => {
                 assert_eq!(polys.len(), 5);
             },
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/pentomino.txt") {
+        match read_polyomino_file("data/pentomino.poly") {
             Ok(polys) => {
                 assert_eq!(polys.len(), 12);
             },
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/hexomino.txt") {
+        match read_polyomino_file("data/hexomino.poly") {
             Ok(polys) => {
                 assert_eq!(polys.len(), 35);
             },
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/heptomino.txt") {
+        match read_polyomino_file("data/heptomino.poly") {
             Ok(polys) => {
                 assert_eq!(polys.len(), 108);
             },
