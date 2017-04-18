@@ -135,10 +135,12 @@ pub mod polyomino_utils {
         res
     }
 
-    // Build all variations of the polyominos (rotated and reflected), *except* 
-    // take one polyomino which has no rotational symmetry (so 8 variations in total)
-    // and give just two variations of it. The idea is to eliminate rotations and
-    // reflections on solutions and we do this by enforcing an oritentation of one
+    // Build all variations of the polyominos (rotated and reflected),
+    // *except* take one polyomino which has no rotational symmetry
+    // (so 8 variations in total) and give just two variations of it
+    // (suitable for a "rectangular" board with two axis of
+    // symmetry. The idea is to eliminate rotations and reflections on
+    // solutions and we do this by enforcing an oritentation of one
     // asymmetric polyomino
     #[allow(dead_code)]
     pub fn build_rect_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
@@ -153,6 +155,33 @@ pub mod polyomino_utils {
                 variations = HashSet::new();
                 variations.insert(p.clone());
                 variations.insert(p.clone().rotate());
+            }
+
+            res.push(variations);
+        }
+
+        res
+    }
+
+    // Build all variations of the polyominos (rotated and reflected),
+    // *except* take one polyomino which has no rotational symmetry
+    // (so 8 variations in total) and give just one variation of it
+    // (suitable for a "square" board with rotational symmetry.  The
+    // idea is to eliminate rotations and reflections on solutions and
+    // we do this by enforcing an oritentation of one asymmetric
+    // polyomino
+    #[allow(dead_code)]
+    pub fn build_square_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
+        let mut res = Vec::with_capacity(polys.len());
+        let mut found_asym = false;
+
+        for p in polys {
+            let mut variations = p.make_all_variations();
+
+            if variations.len() == 8 && !found_asym {
+                found_asym = true;
+                variations = HashSet::new();
+                variations.insert(p.clone());
             }
 
             res.push(variations);
