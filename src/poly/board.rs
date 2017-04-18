@@ -1,5 +1,10 @@
-use std::ops::Range;
+use std::cmp;
 use std::fmt;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Error;
+use std::ops::Range;
 
 use poly::point::Point;
 use poly::polyomino::Polyomino;
@@ -129,6 +134,46 @@ impl<'a> Board<'a> {
         Board { height: h,
                 width: w,
                 board: vec![BoardState::Empty; h*w] }
+    }
+
+    pub fn from_file(name: &str) -> Result<Board, Error> {
+        let f = try!(File::open(name));
+
+        let buf_file = BufReader::new(&f);
+
+        let mut board_x:usize = 0;
+        let mut board_y:usize = 0;
+        let mut lines = Vec::new();
+
+        for wline in buf_file.lines() {
+            let line = wline.unwrap();
+            board_x = cmp::max(board_x, line.len());
+            lines.push(line);
+            board_y = board_y+1;
+        }
+
+        let mut b = Board::new(board_x, board_y);
+
+        let mut y = 0;
+        for line in lines {
+            // We could treat each space as a void, but trailing
+            // spaces may not exist. Instead, mark each space as
+            // void and then mark spaces as empty
+
+            for x in 0..board_x {
+                let idx = b.to_idx(x, y);
+                b.board[idx] = BoardState::Void;
+            }
+
+            for (x, c) in line.chars().enumerate() {
+                if c != ' ' {
+                    let idx = b.to_idx(x, y);
+                    b.board[idx] = BoardState::Empty;
+                }
+            }
+            y=y+1;
+        }
+        Ok(b)
     }
 
     fn to_idx (&self, x: usize, y: usize) -> usize {
@@ -318,7 +363,7 @@ pub mod board_utils {
     pub fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>) -> i32 {
         let usable_candidates = BitVec::from_elem(candidates.len(), true);
         
-    fill_board(b, candidates, &usable_candidates)
+        fill_board(b, candidates, &usable_candidates)
     }
 
     fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>, usable_candidates: &BitVec) -> i32 {
@@ -478,5 +523,22 @@ mod tests {
         assert_eq!(board_utils::fit(&mut b, &x), Some(Point::new(1,1)));
         assert_eq!(board_utils::get_first_unoccupied(&b), Some(Point::new(3,0)));
         assert_eq!(board_utils::fit(&mut b, &i), Some(Point::new(3,0)));
+    }
+
+    #[test]
+    fn test_read() {
+        if let Ok(b) = Board::from_file("data/b8x8holes.txt") {
+            assert_eq!(b.get(0, 0), BoardState::Empty);
+            assert_eq!(b.get(0, 7), BoardState::Empty);
+            assert_eq!(b.get(7, 0), BoardState::Empty);
+            assert_eq!(b.get(7, 7), BoardState::Empty);
+            assert_eq!(b.get(2, 2), BoardState::Void);
+            assert_eq!(b.get(5, 2), BoardState::Void);
+            assert_eq!(b.get(2, 5), BoardState::Void);
+            assert_eq!(b.get(5, 5), BoardState::Void);
+        } else {
+            assert!(false, "Unable to read data/b8x8holes.txt");
+        }
+        
     }
 }
