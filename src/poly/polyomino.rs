@@ -31,7 +31,7 @@ impl Polyomino {
         p.dedup();
         Polyomino { points: p }
     }
-    
+
     // The largest x and y in the set of points. Note: this point may not be in the polyomino
     fn bbox_top_right(&self) -> Point {
         self.points.iter().fold(Point::min_point(), |a, ref p| Point { x: cmp::max(a.x, p.x), y: cmp::max(a.y, p.y) })
@@ -119,7 +119,6 @@ pub mod polyomino_utils {
     use std::io::BufRead;
     use std::io::BufReader;
     use std::io::Error;
-    use std::path::Path;
 
     use poly::point::Point;
     use poly::polyomino::Polyomino;
@@ -201,7 +200,7 @@ pub mod polyomino_utils {
 #[cfg(test)]
 mod tests {
     use poly::point::Point;
-    use Polyomino;
+    use poly::polyomino::Polyomino;
 
     use poly::polyomino::polyomino_utils::read_polyomino_file;
         
