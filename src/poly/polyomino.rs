@@ -124,6 +124,7 @@ pub mod polyomino_utils {
     use poly::polyomino::Polyomino;
 
     // Build all variations of the polyominos (rotated and reflected)
+    #[allow(dead_code)]
     pub fn build_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
         let mut res = Vec::with_capacity(polys.len());
 
@@ -139,6 +140,7 @@ pub mod polyomino_utils {
     // and give just two variations of it. The idea is to eliminate rotations and
     // reflections on solutions and we do this by enforcing an oritentation of one
     // asymmetric polyomino
+    #[allow(dead_code)]
     pub fn build_rect_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
         let mut res = Vec::with_capacity(polys.len());
         let mut found_asym = false;

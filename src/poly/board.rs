@@ -280,6 +280,7 @@ pub mod board_utils {
         adj
     }
 
+    #[allow(dead_code)]
     pub fn get_all_adjacent(p: Point, b: &Board) -> HashSet<Point> {
         let mut region = HashSet::new();
         

@@ -2,8 +2,6 @@ mod poly;
 
 extern crate bit_vec;
 
-use std::collections::HashSet;
-
 use poly::board::Board;
 use poly::board::board_utils;
 use poly::polyomino::polyomino_utils;
