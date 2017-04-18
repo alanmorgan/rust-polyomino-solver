@@ -528,7 +528,7 @@ mod tests {
 
     #[test]
     fn test_read() {
-        if let Ok(b) = Board::from_file("data/b8x8holes.txt") {
+        if let Ok(b) = Board::from_file("data/b8x8holes.board") {
             assert_eq!(b.get(0, 0), BoardState::Empty);
             assert_eq!(b.get(0, 7), BoardState::Empty);
             assert_eq!(b.get(7, 0), BoardState::Empty);
