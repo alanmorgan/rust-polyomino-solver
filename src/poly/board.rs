@@ -371,7 +371,6 @@ pub mod board_utils {
         let mut total = 0;
         
         if usable_candidates.none() {
-            // println!("{}", b);
             return 1;
         }
         
