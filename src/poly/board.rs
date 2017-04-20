@@ -340,38 +340,28 @@ pub mod board_utils {
     }
 
     pub fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>) -> i32 {
-        let usable_candidates = BitVec::from_elem(candidates.len(), true);
+        let mut usable_candidates = BitVec::from_elem(candidates.len(), true);
         
-        fill_board(b, candidates, &usable_candidates)
+        fill_board(b, candidates, &mut usable_candidates)
     }
 
-    fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>, usable_candidates: &BitVec) -> i32 {
+    fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>, usable_candidates: &mut BitVec) -> i32 {
         let mut total = 0;
         
         if usable_candidates.none() {
             return 1;
         }
         
-        let mut uc = usable_candidates.clone();
-        
-        let polys_with_index = usable_candidates.iter().
-            enumerate().
-            zip(candidates.iter()).
-            filter_map(|((n, b), polys)|
-                       if b {
-                           Some((n, polys))
-                       } else {
-                           None
-                       });
-       
         if let Some(fit_point) = get_first_unoccupied(b) {
-            for (n, polys) in polys_with_index {
-                for poly in polys {
-                    if let Some(point) = fit_at(b, &poly, fit_point) {
-                        uc.set(n, false);
-                        total += fill_board(b, candidates, &uc);
-                        uc.set(n, true);
-                        b.remove_polyomino(point);
+            for i in 0..usable_candidates.len() {
+                if usable_candidates.get(i) == Some(true) {
+                    for poly in &candidates[i] {
+                        if let Some(point) = fit_at(b, &poly, fit_point) {
+                            usable_candidates.set(i, false);
+                            total += fill_board(b, candidates, usable_candidates);
+                            usable_candidates.set(i, true);
+                            b.remove_polyomino(point);
+                        }
                     }
                 }
             }
