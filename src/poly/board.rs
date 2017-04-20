@@ -309,51 +309,29 @@ pub mod board_utils {
         region
     }
 
+    #[allow(dead_code)]
     pub fn fit<'a>(b: &mut Board<'a>, p: &'a Polyomino) -> Option<Point> {
-        /* Attempt to fit the polyomino at the first unoccuped spot on the board.
-        
-        Consider the board with the first unoccupied spot marked with a '.'
-        
-        +-+-+-+-+-+
-        | | | | | |
-        +-+-+-+-+-+
-        |.| | | | |
-        +-+-+-+-+-+
-        |X| | | | |
-        +-+-+-+-+-+
-        |X|X|X| | |
-        +-+-+-+-+-+
-        
-        And the polyomino
-        
-         x
-        xxx
-         x
-        
-        To fit this on the board we don't put the (0,0) point of the polyomino on A, we try to put the
-        first occupied point in the polyomino, (0,1), on A. This gives us the best possible fit.
-        
-        +-+-+-+-+-+
-        | |X| | | |
-        +-+-+-+-+-+
-        |X|X|X| | |
-        +-+-+-+-+-+
-        |X|X| | | |
-        +-+-+-+-+-+
-        |X|X|X| | |
-        +-+-+-+-+-+
-        
-        Find the first point of polyomino (this relies on the Point ordering being sane, which it is) and
-        shift the polyomino so that it's at the right position
-         */
+        /* Attempt to fit the polyomino at the first unoccuped spot on the board. */
         
         if let Some(target_pt) = get_first_unoccupied(&b) {
-            if let Some(poly_pt) = p.iter().next() {
-                if poly_pt.x <= target_pt.x && poly_pt.y <= target_pt.y {
-                    if b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y))
-                    {
-                        return Some(target_pt)
-                    }
+            return fit_at(b, p, target_pt)
+        }
+
+        None
+    }
+
+    pub fn fit_at<'a>(b: &mut Board<'a>, p: &'a Polyomino, target_pt: Point) -> Option<Point> {
+        /* Attempt to fit the polyomino at the specified spot on the board.
+        
+         * This is not quite putting the polyomino's 0,0 point at the target_pt, because that point
+         * might not exist in the polyomino (think the `+` pentomino). Instead, take the first point
+         * in the pentomino (which is guaranteed to be the smallest point of the form (0, y) because
+         * the points are sorted) and put *that* at target_pt
+         */
+        if let Some(poly_pt) = p.iter().next() {
+            if poly_pt.x <= target_pt.x && poly_pt.y <= target_pt.y {
+                if b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y)) {
+                    return Some(target_pt)
                 }
             }
         }
@@ -385,16 +363,20 @@ pub mod board_utils {
                        } else {
                            None
                        });
-        
-        for (n, polys) in polys_with_index {
-            for poly in polys {
-                if let Some(point) = fit(b, &poly) {
-                    uc.set(n, false);
-                    total += fill_board(b, candidates, &uc);
-                    uc.set(n, true);
-                    b.remove_polyomino(point);
+       
+        if let Some(fit_point) = get_first_unoccupied(b) {
+            for (n, polys) in polys_with_index {
+                for poly in polys {
+                    if let Some(point) = fit_at(b, &poly, fit_point) {
+                        uc.set(n, false);
+                        total += fill_board(b, candidates, &uc);
+                        uc.set(n, true);
+                        b.remove_polyomino(point);
+                    }
                 }
             }
+        } else {
+            panic!("Pieces left over, but no unoccupied points");
         }
         
         total
