@@ -66,7 +66,7 @@ impl Polyomino {
         self.points.iter()
     }
 
-    fn make_rotations(&self) -> HashSet<Polyomino> {
+    fn make_rotations(&self) -> Vec<Polyomino> {
         let mut res = HashSet::new();
         
         res.insert(self.clone());
@@ -74,10 +74,11 @@ impl Polyomino {
         res.insert(self.clone().rotate().rotate());
         res.insert(self.clone().rotate().rotate().rotate());
 
-        res
+        let rotations = res.drain().collect();
+        rotations
     }
 
-    pub fn make_all_variations(&self) -> HashSet<Polyomino> {
+    pub fn make_all_variations(&self) -> Vec<Polyomino> {
         let mut res = HashSet::new();
         
         res.insert(self.clone());
@@ -90,7 +91,8 @@ impl Polyomino {
         res.insert(self.clone().flip().rotate().rotate());
         res.insert(self.clone().flip().rotate().rotate().rotate());
         
-        res
+        let rotations = res.drain().collect();
+        rotations
     }
 }
 
@@ -125,7 +127,7 @@ pub mod polyomino_utils {
 
     // Build all variations of the polyominos (rotated and reflected)
     #[allow(dead_code)]
-    pub fn build_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
+    pub fn build_variations(polys: &Vec<Polyomino>) -> Vec<Vec<Polyomino>> {
         let mut res = Vec::with_capacity(polys.len());
 
         for p in polys {
@@ -143,7 +145,7 @@ pub mod polyomino_utils {
     // solutions and we do this by enforcing an oritentation of one
     // asymmetric polyomino
     #[allow(dead_code)]
-    pub fn build_rect_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
+    pub fn build_rect_variations(polys: &Vec<Polyomino>) -> Vec<Vec<Polyomino>> {
         let mut res = Vec::with_capacity(polys.len());
         let mut found_asym = false;
 
@@ -152,9 +154,9 @@ pub mod polyomino_utils {
 
             if variations.len() == 8 && !found_asym {
                 found_asym = true;
-                variations = HashSet::new();
-                variations.insert(p.clone());
-                variations.insert(p.clone().rotate());
+                variations = Vec::new();
+                variations.push(p.clone());
+                variations.push(p.clone().rotate());
             }
 
             res.push(variations);
@@ -171,7 +173,7 @@ pub mod polyomino_utils {
     // we do this by enforcing an oritentation of one asymmetric
     // polyomino
     #[allow(dead_code)]
-    pub fn build_square_variations(polys: &Vec<Polyomino>) -> Vec<HashSet<Polyomino>> {
+    pub fn build_square_variations(polys: &Vec<Polyomino>) -> Vec<Vec<Polyomino>> {
         let mut res = Vec::with_capacity(polys.len());
         let mut found_asym = false;
 
@@ -180,8 +182,8 @@ pub mod polyomino_utils {
 
             if variations.len() == 8 && !found_asym {
                 found_asym = true;
-                variations = HashSet::new();
-                variations.insert(p.clone());
+                variations = Vec::new();
+                variations.push(p.clone());
             }
 
             res.push(variations);

@@ -361,13 +361,13 @@ pub mod board_utils {
         None
     }
 
-    pub fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>) -> i32 {
+    pub fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>) -> i32 {
         let usable_candidates = BitVec::from_elem(candidates.len(), true);
         
         fill_board(b, candidates, &usable_candidates)
     }
 
-    fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<HashSet<Polyomino>>, usable_candidates: &BitVec) -> i32 {
+    fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>, usable_candidates: &BitVec) -> i32 {
         let mut total = 0;
         
         if usable_candidates.none() {
