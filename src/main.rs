@@ -14,10 +14,10 @@ fn main() {
 
     if let Ok(polyominoes) = polyomino_utils::read_polyomino_file(polyomino_name) {
         let all_polyominoes = polyomino_utils::build_rect_variations(&polyominoes);
-        let mut b = Board::new(12, 5);
+        let mut b = Board::new(10, 6);
         let start_time = Instant::now();
 
-        let num_solutions = board_utils::fill(&mut b, &all_polyominoes);
+        let num_solutions = board_utils::fill(&mut b, &all_polyominoes, Some(&check_region));
         let elapsed = start_time.elapsed();
         let elapsed_millis = elapsed.as_secs() * 1000 as u64 + (elapsed.subsec_nanos() / 1000000) as u64;
 
@@ -29,3 +29,11 @@ fn main() {
         panic!("Can't find polyomino file {}", polyomino_name);
     }
 }
+
+fn check_region_pentomino(b: &Board) -> bool {
+    if let Some(first_point) = board_utils::get_first_unoccupied(b) {
+        return board_utils::get_all_adjacent(first_point, b).len()%5 == 0;
+    }
+    false
+}
+

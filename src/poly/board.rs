@@ -339,26 +339,32 @@ pub mod board_utils {
         None
     }
 
-    pub fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>) -> i32 {
+    pub fn fill<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>, region_check: Option<&Fn(&Board)->bool>) -> i32 {
         let mut usable_candidates = BitVec::from_elem(candidates.len(), true);
         
-        fill_board(b, candidates, &mut usable_candidates)
+        fill_board(b, candidates, &mut usable_candidates, region_check)
     }
 
-    fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>, usable_candidates: &mut BitVec) -> i32 {
+    fn fill_board<'a>(b : &mut Board<'a>, candidates: &'a Vec<Vec<Polyomino>>, usable_candidates: &mut BitVec, region_check: Option<&Fn(&Board)->bool>) -> i32 {
         let mut total = 0;
         
         if usable_candidates.none() {
             return 1;
         }
         
+        if let Some(region_check_fn) = region_check {
+            if !region_check_fn(b) {
+                return 0;
+            }
+        }
+
         if let Some(fit_point) = get_first_unoccupied(b) {
             for i in 0..usable_candidates.len() {
                 if usable_candidates.get(i) == Some(true) {
                     for poly in &candidates[i] {
                         if let Some(point) = fit_at(b, &poly, fit_point) {
                             usable_candidates.set(i, false);
-                            total += fill_board(b, candidates, usable_candidates);
+                            total += fill_board(b, candidates, usable_candidates, region_check);
                             usable_candidates.set(i, true);
                             b.remove_polyomino(point);
                         }
