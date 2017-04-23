@@ -6,6 +6,7 @@
 
 # emacs tmp files
 \#*\#
+*~
 
 # Executables
 *.exe
