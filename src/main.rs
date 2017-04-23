@@ -7,6 +7,7 @@ use std::time::Instant;
 use poly::board::Board;
 use poly::board::board_utils;
 use poly::polyomino::polyomino_utils;
+use poly::solver::PrintSolutions;
 use poly::solver::Solver;
 
 fn main() {
@@ -21,6 +22,7 @@ fn main() {
 
         let mut solver = Solver::new(&mut b, &all_polyominoes);
         solver.set_region_checker(crp);
+        solver.set_print_solutions(PrintSolutions::PrintTotalOnly);
 
         let num_solutions = solver.solve();
 
