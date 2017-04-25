@@ -9,7 +9,7 @@ use poly::polyomino::Polyomino;
 pub enum PrintSolutions {
     PrintTotalOnly,
     PrintAll,
-    PrintEvery(u32)
+    PrintEveryNth(u32)
 }
 
 pub struct Solver<'a, 'b> {
@@ -75,7 +75,7 @@ impl <'a, 'b, 'c> RealSolver<'a, 'b, 'c> {
             match self.solver.print_solutions {
                 PrintSolutions::PrintAll => println!("Solution {}\n{}", self.solutions_found, self.solver.board),
                 PrintSolutions::PrintTotalOnly => (),
-                PrintSolutions::PrintEvery(n) => if self.solutions_found % n == 0 { println!("Solution {}\n{}", self.solutions_found, self.solver.board) }
+                PrintSolutions::PrintEveryNth(n) => if self.solutions_found % n == 0 { println!("Solution {}\n{}", self.solutions_found, self.solver.board) }
             }
 
             return;
