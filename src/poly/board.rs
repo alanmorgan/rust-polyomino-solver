@@ -178,7 +178,7 @@ impl<'a> Board<'a> {
     }
 
     fn to_idx (&self, x: usize, y: usize) -> usize {
-        x + y * self.width
+        x * self.height + y
     }
 
     pub fn erase(&mut self, x: usize, y:usize) {
@@ -239,13 +239,11 @@ pub mod board_utils {
     
     use std::collections::HashSet;
     use std::collections::VecDeque;
-    
+
     pub fn get_first_unoccupied(b: &Board) -> Option<Point> {
-        for c in b.col_range() {
-            for r in b.row_range() {
-                if b.get(c, r) == BoardState::Empty {
-                    return Some(Point::new(c, r));
-                }
+        for i in 0..b.board.len() {
+            if b.board[i] == BoardState::Empty {
+                return Some(Point::new(i/b.height, i%b.height));
             }
         }
 
