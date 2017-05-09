@@ -3,7 +3,7 @@ use std::cmp;
 use std::collections::HashSet;
 use std::slice::Iter;
 
-use poly::point::Point;
+use point::Point;
 
 #[derive(Debug, Hash, Clone)]
 #[allow(dead_code)]
@@ -121,8 +121,8 @@ pub mod polyomino_utils {
     use std::io::BufReader;
     use std::io::Error;
 
-    use poly::point::Point;
-    use poly::polyomino::Polyomino;
+    use point::Point;
+    use polyomino::Polyomino;
 
     // Build all variations of the polyominos (rotated and reflected)
     #[allow(dead_code)]
@@ -231,10 +231,10 @@ pub mod polyomino_utils {
 
 #[cfg(test)]
 mod tests {
-    use poly::point::Point;
-    use poly::polyomino::Polyomino;
+    use point::Point;
+    use polyomino::Polyomino;
 
-    use poly::polyomino::polyomino_utils::read_polyomino_file;
+    use polyomino::polyomino_utils::read_polyomino_file;
         
     #[test]
     fn test_read() {

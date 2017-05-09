@@ -44,7 +44,7 @@ impl Point {
 
 #[cfg(test)]
 mod tests {
-    use poly::point::Point;
+    use point::Point;
 
     #[test]
     fn ord() {

@@ -1,9 +1,9 @@
 
 use bit_vec::BitVec;
 
-use poly::board::Board;
-use poly::board::board_utils;
-use poly::polyomino::Polyomino;
+use board::Board;
+use board::board_utils;
+use polyomino::Polyomino;
 
 #[derive(PartialEq)]
 pub enum PrintSolutions {

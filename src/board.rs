@@ -6,8 +6,8 @@ use std::io::BufReader;
 use std::io::Error;
 use std::ops::Range;
 
-use poly::point::Point;
-use poly::polyomino::Polyomino;
+use point::Point;
+use polyomino::Polyomino;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum BoardState<'a> {
@@ -232,10 +232,10 @@ impl<'a> Board<'a> {
 }
 
 pub mod board_utils {
-    use poly::board::Board;
-    use poly::board::BoardState;
-    use poly::point::Point;
-    use poly::polyomino::Polyomino;
+    use board::Board;
+    use board::BoardState;
+    use point::Point;
+    use polyomino::Polyomino;
     
     use std::collections::HashSet;
     use std::collections::VecDeque;
@@ -338,11 +338,11 @@ pub mod board_utils {
 
 #[cfg(test)]
 mod tests {
-    use poly::board::Board;
-    use poly::board::BoardState;
-    use poly::board::board_utils;
-    use poly::point::Point;
-    use poly::polyomino::Polyomino;
+    use board::Board;
+    use board::BoardState;
+    use board::board_utils;
+    use point::Point;
+    use polyomino::Polyomino;
 
     fn build_u() -> Polyomino {
         let mut p = Vec::new();
@@ -474,6 +474,5 @@ mod tests {
         } else {
             assert!(false, "Unable to read data/b8x8holes.txt");
         }
-        
     }
 }

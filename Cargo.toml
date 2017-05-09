@@ -3,8 +3,19 @@ name = "polyomino"
 version = "0.0.1"
 authors = ["amorgan"]
 
+[lib]
+name = "polyomino"
+path = "src/lib.rs"
+
+[[bin]]
+name = "polyrun"
+path = "src/main.rs"
+
 [dependencies]
 num="*"
 byteorder="*"
 rand="*"
-bit-vec="0.4.2"
+bit-vec="*"
+
+[profile.release]
+debug = true

@@ -1,14 +1,13 @@
-mod poly;
-
+extern crate polyomino;
 extern crate bit_vec;
 
 use std::time::Instant;
 
-use poly::board::Board;
-use poly::board::board_utils;
-use poly::polyomino::polyomino_utils;
-use poly::solver::PrintSolutions;
-use poly::solver::Solver;
+use polyomino::board::Board;
+use polyomino::board::board_utils;
+use polyomino::polyomino::polyomino_utils;
+use polyomino::solver::PrintSolutions;
+use polyomino::solver::Solver;
 
 fn main() {
     let polyomino_name = "data/pentomino.poly";
@@ -16,12 +15,12 @@ fn main() {
 
     if let Ok(polyominoes) = polyomino_utils::read_polyomino_file(polyomino_name) {
         let all_polyominoes = polyomino_utils::build_rect_variations(&polyominoes);
-        let mut b = Board::new(10, 6);
         let crp = &check_region_pentomino;
+        let mut b = Board::new(10, 6);
         let start_time = Instant::now();
 
         let mut solver = Solver::new(&mut b, &all_polyominoes);
-        solver.set_region_checker(crp);
+        // solver.set_region_checker(crp);
         solver.set_print_solutions(PrintSolutions::PrintTotalOnly);
 
         let num_solutions = solver.solve();
