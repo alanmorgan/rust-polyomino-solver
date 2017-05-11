@@ -6,6 +6,7 @@ use std::time::Instant;
 use polyomino::board::Board;
 use polyomino::board::board_utils;
 use polyomino::polyomino::polyomino_utils;
+use polyomino::polyomino::polyomino_utils::Restrictions;
 use polyomino::solver::PrintSolutions;
 use polyomino::solver::Solver;
 
@@ -14,7 +15,7 @@ fn main() {
 
 
     if let Ok(polyominoes) = polyomino_utils::read_polyomino_file(polyomino_name) {
-        let all_polyominoes = polyomino_utils::build_rect_variations(&polyominoes);
+        let all_polyominoes = polyomino_utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
         let crp = &check_region_pentomino;
         let mut b = Board::new(10, 6);
         let start_time = Instant::now();

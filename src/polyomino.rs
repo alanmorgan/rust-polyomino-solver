@@ -124,73 +124,46 @@ pub mod polyomino_utils {
     use point::Point;
     use polyomino::Polyomino;
 
-    // Build all variations of the polyominos (rotated and reflected)
     #[allow(dead_code)]
-    pub fn build_variations(polys: &Vec<Polyomino>) -> Vec<Vec<Polyomino>> {
-        let mut res = Vec::with_capacity(polys.len());
-
-        for p in polys {
-            res.push(p.make_all_variations());
-        }
-
-        res
+    pub enum Restrictions {
+        None,
+        SquareSymmetry,
+        RectangularSymmetry
+        // SingleSided
     }
 
-    // Build all variations of the polyominos (rotated and reflected),
-    // *except* take one polyomino which has no rotational symmetry
-    // (so 8 variations in total) and give just two variations of it
-    // (suitable for a "rectangular" board with two axis of
-    // symmetry. The idea is to eliminate rotations and reflections on
-    // solutions and we do this by enforcing an oritentation of one
-    // asymmetric polyomino
     #[allow(dead_code)]
-    pub fn build_rect_variations(polys: &Vec<Polyomino>) -> Vec<Vec<Polyomino>> {
+    pub fn build_variations(polys: &Vec<Polyomino>, restrict: Restrictions) -> Vec<Vec<Polyomino>> {
         let mut res = Vec::with_capacity(polys.len());
         let mut found_asym = false;
 
         for p in polys {
             let mut variations = p.make_all_variations();
 
-            if variations.len() == 8 && !found_asym {
-                found_asym = true;
-                variations = Vec::new();
-                variations.push(p.clone());
-                variations.push(p.clone().rotate());
+            match *&restrict {
+                Restrictions::None => (),
+                Restrictions::SquareSymmetry => {
+                    if !found_asym && variations.len() == 8 {
+                        found_asym = true;
+                        variations = Vec::new();
+                        variations.push(p.clone());
+                    }
+                },
+                Restrictions::RectangularSymmetry => {
+                    if !found_asym && variations.len() == 8 {
+                        found_asym = true;
+                        variations = Vec::new();
+                        variations.push(p.clone());
+                        variations.push(p.clone().rotate());
+                    }
+                }
             }
-
             res.push(variations);
         }
 
         res
     }
-
-    // Build all variations of the polyominos (rotated and reflected),
-    // *except* take one polyomino which has no rotational symmetry
-    // (so 8 variations in total) and give just one variation of it
-    // (suitable for a "square" board with rotational symmetry.  The
-    // idea is to eliminate rotations and reflections on solutions and
-    // we do this by enforcing an oritentation of one asymmetric
-    // polyomino
-    #[allow(dead_code)]
-    pub fn build_square_variations(polys: &Vec<Polyomino>) -> Vec<Vec<Polyomino>> {
-        let mut res = Vec::with_capacity(polys.len());
-        let mut found_asym = false;
-
-        for p in polys {
-            let mut variations = p.make_all_variations();
-
-            if variations.len() == 8 && !found_asym {
-                found_asym = true;
-                variations = Vec::new();
-                variations.push(p.clone());
-            }
-
-            res.push(variations);
-        }
-
-        res
-    }
-
+    
     pub fn read_polyomino_file(name: &str) -> Result<Vec<Polyomino>, Error> {
         let mut res = Vec::new();
 
