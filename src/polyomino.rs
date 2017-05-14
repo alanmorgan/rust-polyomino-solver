@@ -241,6 +241,12 @@ mod tests {
             },
             Err(..) => assert!(false),
         }
+        match read_polyomino_file("data/octomino.poly") {
+            Ok(polys) => {
+                assert_eq!(polys.len(), 369);
+            },
+            Err(..) => assert!(false),
+        }
     }
 
     fn build_f_pentomino() -> Polyomino {
