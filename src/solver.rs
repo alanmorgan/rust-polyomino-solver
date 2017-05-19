@@ -15,7 +15,7 @@ pub enum PrintSolutions {
 pub struct Solver<'a, 'b> {
     board: &'a mut Board<'a>,
     candidates: &'a Vec<Vec<Polyomino>>,
-    region_check: Option<&'b Fn(&Board)->bool>,
+    region_check: Option<&'b Fn(&Board, usize)->bool>,
     print_solutions: PrintSolutions
 }
 
@@ -29,7 +29,7 @@ impl<'a, 'b> Solver<'a, 'b> {
     }
 
     #[allow(dead_code)]
-    pub fn set_region_checker(&mut self, rc: &'b Fn(&Board)->bool) {
+    pub fn set_region_checker(&mut self, rc: &'b Fn(&Board, usize)->bool) {
         self.region_check = Some(rc);
     }
 
@@ -81,13 +81,13 @@ impl <'a, 'b, 'c> RealSolver<'a, 'b, 'c> {
             return;
         }
         
-        if let Some(region_check_fn) = self.solver.region_check {
-            if !region_check_fn(self.solver.board) {
-                return;
-            }
-        }
-
         if let Some(fit_point) = board_utils::get_first_unoccupied(&mut self.solver.board) {
+            if let Some(region_check_fn) = self.solver.region_check {
+                if !region_check_fn(self.solver.board, board_utils::get_all_adjacent(fit_point, &self.solver.board).len()) {
+                    return;
+                }
+            }
+
             for i in 0..usable_candidates.len() {
                 if usable_candidates.get(i) == Some(true) {
                     for poly in &self.solver.candidates[i] {

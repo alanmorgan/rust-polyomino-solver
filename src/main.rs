@@ -4,7 +4,6 @@ extern crate bit_vec;
 use std::time::Instant;
 
 use polyomino::board::Board;
-use polyomino::board::board_utils;
 use polyomino::polyomino::polyomino_utils;
 use polyomino::polyomino::polyomino_utils::Restrictions;
 use polyomino::solver::PrintSolutions;
@@ -38,10 +37,7 @@ fn main() {
     }
 }
 
-fn check_region_pentomino(b: &Board) -> bool {
-    if let Some(first_point) = board_utils::get_first_unoccupied(b) {
-        return board_utils::get_all_adjacent(first_point, b).len()%5 == 0;
-    }
-    false
+fn check_region_pentomino(b: &Board, region_size: usize) -> bool {
+    region_size%5 == 0
 }
 
