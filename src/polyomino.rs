@@ -122,6 +122,7 @@ pub mod polyomino_utils {
     use std::io::Error;
 
     use point::Point;
+    use point::PointPos;
     use polyomino::Polyomino;
 
     #[allow(dead_code)]
@@ -185,7 +186,7 @@ pub mod polyomino_utils {
                 str => {
                     for (i, c) in str.chars().enumerate() {
                         if c != ' ' {
-                            points.push(Point::new(count, i));
+                            points.push(Point::new(count, i as PointPos));
                         }
                     }
                     count=count+1;

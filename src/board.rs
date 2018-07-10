@@ -7,6 +7,7 @@ use std::io::Error;
 use std::ops::Range;
 
 use point::Point;
+use point::PointPos;
 use polyomino::Polyomino;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -14,7 +15,7 @@ pub enum BoardState<'a> {
      Void,      // Out of bounds/a hole in the board
      Empty,     // A valid part of the board, but no piece is there
      // Checked,   // Used during get_all_adjacent
-     Full(& 'a Polyomino, usize, usize)  // Has a piece
+     Full(& 'a Polyomino, PointPos, PointPos)  // Has a piece
 }
 
 impl<'a> fmt::Display for BoardState<'a> {
@@ -35,8 +36,8 @@ impl<'a> BoardState<'a> {
 }
 
 pub struct Board<'a> {
-    height: usize,
-    width: usize,
+    height: PointPos,
+    width: PointPos,
     board: Vec<BoardState<'a>>
 }
 
@@ -67,7 +68,7 @@ impl<'a> fmt::Display for Board<'a> {
             f.write_str("\n")
         }
         
-        fn print_row(s: &Board, f: &mut fmt::Formatter, y: usize) -> fmt::Result {
+        fn print_row(s: &Board, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
             for x in 0 .. s.width {
                 let piece = s.get(x, y);
                 
@@ -93,7 +94,7 @@ impl<'a> fmt::Display for Board<'a> {
             print_row_bottom_border(s, f, y)
         }
         
-        fn print_row_bottom_border(s: &Board, f: &mut fmt::Formatter, y: usize) -> fmt::Result {
+        fn print_row_bottom_border(s: &Board, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
             try!(f.write_str(if s.get(0,y) == BoardState::Void {
                 " " 
             } else {
@@ -131,10 +132,10 @@ impl<'a> fmt::Display for Board<'a> {
 
 #[allow(dead_code)]
 impl<'a> Board<'a> {
-    pub fn new(w: usize, h: usize) -> Board<'a> {
+    pub fn new(w: PointPos, h: PointPos) -> Board<'a> {
         Board { height: h,
                 width: w,
-                board: vec![BoardState::Empty; h*w] }
+                board: vec![BoardState::Empty; (h*w) as usize] }
     }
 
     pub fn from_file(name: &str) -> Result<Board, Error> {
@@ -142,13 +143,13 @@ impl<'a> Board<'a> {
 
         let buf_file = BufReader::new(&f);
 
-        let mut board_x:usize = 0;
-        let mut board_y:usize = 0;
+        let mut board_x:PointPos = 0;
+        let mut board_y:PointPos = 0;
         let mut lines = Vec::new();
 
         for wline in buf_file.lines() {
             let line = wline.unwrap();
-            board_x = cmp::max(board_x, line.len());
+            board_x = cmp::max(board_x, line.len() as PointPos);
             lines.push(line);
             board_y = board_y+1;
         }
@@ -168,7 +169,7 @@ impl<'a> Board<'a> {
 
             for (x, c) in line.chars().enumerate() {
                 if c != ' ' {
-                    let idx = b.to_idx(x, y);
+                    let idx = b.to_idx(x as PointPos, y);
                     b.board[idx] = BoardState::Empty;
                 }
             }
@@ -177,20 +178,20 @@ impl<'a> Board<'a> {
         Ok(b)
     }
 
-    fn to_idx (&self, x: usize, y: usize) -> usize {
-        x * self.height + y
+    fn to_idx (&self, x: PointPos, y: PointPos) -> usize {
+        (x * self.height + y) as usize
     }
 
-    pub fn erase(&mut self, x: usize, y:usize) {
+    pub fn erase(&mut self, x: PointPos, y:PointPos) {
         self.set(x, y, BoardState::Void);
     }
 
-    fn set(&mut self, x: usize, y: usize, state: BoardState<'a>) {
+    fn set(&mut self, x: PointPos, y: PointPos, state: BoardState<'a>) {
         let idx = self.to_idx(x, y);
         self.board[idx] = state;
     }
 
-    pub fn get(&self, x: usize, y: usize) -> BoardState<'a> {
+    pub fn get(&self, x: PointPos, y: PointPos) -> BoardState<'a> {
         if self.on_board(x, y) {
             return self.board[self.to_idx(x, y)];
         }
@@ -218,15 +219,15 @@ impl<'a> Board<'a> {
         }
     }
     
-    fn on_board(&self, x: usize, y: usize) -> bool {
+    fn on_board(&self, x: PointPos, y: PointPos) -> bool {
         x < self.width && y < self.height
     }
     
-    pub fn row_range(&self) -> Range<usize> {
+    pub fn row_range(&self) -> Range<PointPos> {
        0 .. self.height
     }
 
-    pub fn col_range(&self) -> Range<usize> {
+    pub fn col_range(&self) -> Range<PointPos> {
        0 .. self.width
     }
 }
@@ -235,6 +236,7 @@ pub mod board_utils {
     use board::Board;
     use board::BoardState;
     use point::Point;
+    use point::PointPos;
     use polyomino::Polyomino;
     
     use std::collections::HashSet;
@@ -243,7 +245,7 @@ pub mod board_utils {
     pub fn get_first_unoccupied(b: &Board) -> Option<Point> {
         for i in 0..b.board.len() {
             if b.board[i] == BoardState::Empty {
-                return Some(Point::new(i/b.height, i%b.height));
+                return Some(Point::new(i as PointPos/b.height, i as PointPos%b.height));
             }
         }
 

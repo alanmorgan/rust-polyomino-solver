@@ -1,9 +1,11 @@
 use std::cmp::Ordering;
 
+pub type PointPos = i8;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Point {
-    pub x: usize,
-    pub y: usize
+    pub x: PointPos,
+    pub y: PointPos
 }
 
 impl Ord for Point {
@@ -29,12 +31,12 @@ impl PartialOrd for Point {
 
 #[allow(dead_code)]
 impl Point {
-    pub fn new(new_x:usize, new_y:usize) -> Point {
+    pub fn new(new_x:PointPos, new_y:PointPos) -> Point {
         Point { x: new_x, y: new_y }
     }
 
     pub fn max_point() -> Point {
-        Point::new(usize::max_value(), usize::max_value())
+        Point::new(PointPos::max_value(), PointPos::max_value())
     }
     
     pub fn min_point() -> Point {

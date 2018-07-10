@@ -15,7 +15,7 @@ fn main() {
 
     if let Ok(polyominoes) = polyomino_utils::read_polyomino_file(polyomino_name) {
         let all_polyominoes = polyomino_utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
-        let crp = &check_region_pentomino;
+        let _crp = &check_region_pentomino;
         let mut b = Board::new(10, 6);
         let start_time = Instant::now();
 
@@ -37,7 +37,7 @@ fn main() {
     }
 }
 
-fn check_region_pentomino(b: &Board, region_size: usize) -> bool {
+fn check_region_pentomino(_b: &Board, region_size: usize) -> bool {
     region_size%5 == 0
 }
 
