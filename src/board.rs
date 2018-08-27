@@ -252,7 +252,7 @@ pub mod board_utils {
         None
     }
 
-    fn get_adjacent(p: Point, b: &Board) -> HashSet<Point> {
+    pub fn get_adjacent(p: Point, b: &Board) -> HashSet<Point> {
         let mut adj = HashSet::new();
 
         // UP
@@ -266,12 +266,12 @@ pub mod board_utils {
         }
 
         // DOWN
-        if b.get(p.x, p.y+1) == BoardState::Empty {
+        if p.y != b.height-1 && b.get(p.x, p.y+1) == BoardState::Empty {
             adj.insert(Point::new(p.x,p.y+1));
         }
         
         // RIGHT
-        if b.get(p.x+1, p.y) == BoardState::Empty {
+        if p.x != b.width-1 && b.get(p.x+1, p.y) == BoardState::Empty {
             adj.insert(Point::new(p.x+1,p.y));
         }
 
@@ -476,5 +476,27 @@ mod tests {
         } else {
             assert!(false, "Unable to read data/b8x8holes.txt");
         }
+    }
+
+    #[test]
+    fn test_get_adjacent() {
+        // X.X
+        // ...
+        // X.X
+        // X.X
+        let mut b = Board::new(3,4);
+
+        b.set(0, 0, BoardState::Void);
+        b.set(2, 0, BoardState::Void);
+        b.set(0, 2, BoardState::Void);
+        b.set(2, 2, BoardState::Void);
+        b.set(0, 3, BoardState::Void);
+        b.set(2, 3, BoardState::Void);
+
+        assert_eq!(board_utils::get_adjacent(Point::new(1, 1), &b).len(), 4);
+        
+        assert_eq!(board_utils::get_adjacent(Point::new(1, 3), &b).len(), 1);
+        
+        assert_eq!(board_utils::get_adjacent(Point::new(2, 1), &b).len(), 1);
     }
 }
