@@ -72,11 +72,11 @@ impl<'a, 'b> Solver<'a, 'b> {
             for i in 0..usable_candidates.len() {
                 if usable_candidates.get(i) == Some(true) {
                     for poly in &self.candidates[i] {
-                        if let Some(point) = board_utils::fit_at(&mut self.board, &poly, fit_point) {
+                        if board_utils::fit_at(&mut self.board, &poly, fit_point) {
                             usable_candidates.set(i, false);
                             self.solve_ex(usable_candidates);
                             usable_candidates.set(i, true);
-                            self.board.remove_polyomino(point);
+                            self.board.remove_polyomino(fit_point);
                         }
                     }
                 }

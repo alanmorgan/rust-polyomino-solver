@@ -312,13 +312,15 @@ pub mod board_utils {
         /* Attempt to fit the polyomino at the first unoccuped spot on the board. */
         
         if let Some(target_pt) = get_first_unoccupied(&b) {
-            return fit_at(b, p, target_pt)
+            if fit_at(b, p, target_pt) {
+                return Some(target_pt)
+            }
         }
 
         None
     }
 
-    pub fn fit_at<'a>(b: &mut Board<'a>, p: &'a Polyomino, target_pt: Point) -> Option<Point> {
+    pub fn fit_at<'a>(b: &mut Board<'a>, p: &'a Polyomino, target_pt: Point) -> bool {
         /* Attempt to fit the polyomino at the specified spot on the board.
         
          * This is not quite putting the polyomino's 0,0 point at the target_pt, because that point
@@ -329,12 +331,12 @@ pub mod board_utils {
         if let Some(poly_pt) = p.iter().next() {
             if poly_pt.x <= target_pt.x && poly_pt.y <= target_pt.y {
                 if b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y)) {
-                    return Some(target_pt)
+                    return true;
                 }
             }
         }
         
-        None
+        false
     }
 }
 
