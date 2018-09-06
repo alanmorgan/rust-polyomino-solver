@@ -199,7 +199,7 @@ impl<'a> Board<'a> {
         BoardState::Void
     }
 
-    pub fn add_polyomino(&mut self, p: &'a Polyomino, ll: Point) -> bool {
+    pub fn add_polyomino<'b>(&mut self, p: &'a Polyomino, ll: &'b Point) -> bool{
         if p.iter().any(|&pt| self.get(pt.x + ll.x, pt.y + ll.y) != BoardState::Empty) {
             return false;
         }
@@ -210,8 +210,8 @@ impl<'a> Board<'a> {
         
         true
     }
-
-    pub fn remove_polyomino(&mut self, ll: Point) {
+    
+    pub fn remove_polyomino<'b>(&mut self, ll: &'b Point) {
         if let BoardState::Full(p, start_x, start_y) = self.get(ll.x, ll.y) {
             for pt in p.iter() {
                 self.set(pt.x + start_x, pt.y + start_y, BoardState::Empty);
@@ -312,7 +312,7 @@ pub mod board_utils {
         /* Attempt to fit the polyomino at the first unoccuped spot on the board. */
         
         if let Some(target_pt) = get_first_unoccupied(&b) {
-            if fit_at(b, p, target_pt) {
+            if fit_at(b, p, &target_pt) {
                 return Some(target_pt)
             }
         }
@@ -320,7 +320,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn fit_at<'a>(b: &mut Board<'a>, p: &'a Polyomino, target_pt: Point) -> bool {
+    pub fn fit_at<'a,'b>(b: &mut Board<'a>, p: &'a Polyomino, target_pt: &'b Point) -> bool {
         /* Attempt to fit the polyomino at the specified spot on the board.
         
          * This is not quite putting the polyomino's 0,0 point at the target_pt, because that point
@@ -330,7 +330,7 @@ pub mod board_utils {
          */
         if let Some(poly_pt) = p.iter().next() {
             if poly_pt.x <= target_pt.x && poly_pt.y <= target_pt.y {
-                if b.add_polyomino(p, Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y)) {
+                if b.add_polyomino(p, &Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y)) {
                     return true;
                 }
             }
@@ -420,15 +420,15 @@ mod tests {
         let l = build_l();
 
         let mut b = Board::new(12,5);
-        b.add_polyomino(&w, Point::new(0, 0));
-        b.add_polyomino(&l, Point::new(4, 0));
+        b.add_polyomino(&w, &Point::new(0, 0));
+        b.add_polyomino(&l, &Point::new(4, 0));
         assert!(b.get(0, 0) == BoardState::Full(&w, 0, 0));
         assert!(b.get(4, 0) == BoardState::Full(&l, 4, 0));
         assert!(b.get(4, 3) == BoardState::Full(&l, 4, 0));
-        b.remove_polyomino(Point::new(1, 1));
+        b.remove_polyomino(&Point::new(1, 1));
         assert!(b.get(0, 0) == BoardState::Empty);
         assert!(b.get(4, 0) == BoardState::Full(&l, 4, 0));
-        b.remove_polyomino(Point::new(4, 2));
+        b.remove_polyomino(&Point::new(4, 2));
         assert!(b.get(4, 0) == BoardState::Empty);
     }
     
