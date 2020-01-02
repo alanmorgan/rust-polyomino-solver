@@ -15,7 +15,7 @@ pub enum PrintSolutions {
 pub struct Solver<'a, 'b> {
     board: &'a mut Board<'a>,
     candidates: &'a Vec<Vec<Polyomino>>,
-    region_check: Option<&'b Fn(&Board, usize)->bool>,
+    region_check: Option<&'b dyn Fn(&Board, usize)->bool>,
     print_solutions: PrintSolutions,
     solutions_found: u32
 }
@@ -31,7 +31,7 @@ impl<'a, 'b> Solver<'a, 'b> {
     }
 
     #[allow(dead_code)]
-    pub fn set_region_checker(&mut self, rc: &'b Fn(&Board, usize)->bool) {
+    pub fn set_region_checker(&mut self, rc: &'b dyn Fn(&Board, usize)->bool) {
         self.region_check = Some(rc);
     }
 

@@ -103,12 +103,12 @@ impl fmt::Display for Polyomino {
         for y in 0..height+1 {
             for x in 0..width+1 {
                 if let Some(_p) = self.points.iter().find(|ref p| p.x == x && p.y == (height-y)) {
-                    try!(write!(f, "X"));
+                    write!(f, "X")?;
                 } else {
-                    try!(write!(f, " "));
+                    write!(f, " ")?;
                 }
             }
-            try!(writeln!(f, ""));
+            writeln!(f, "")?;
         }
 
         Ok(())
@@ -168,7 +168,7 @@ pub mod polyomino_utils {
     pub fn read_polyomino_file(name: &str) -> Result<Vec<Polyomino>, Error> {
         let mut res = Vec::new();
 
-        let f = try!(File::open(name));
+        let f = File::open(name)?;
 
         let buff_file = BufReader::new(&f);
 

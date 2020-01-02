@@ -45,16 +45,16 @@ impl<'a> fmt::Display for Board<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 
         fn print_top_row_border(s: &Board, f: &mut fmt::Formatter) -> fmt::Result {
-            try!(f.write_str(if s.get(0,0) == BoardState::Void {
+            f.write_str(if s.get(0,0) == BoardState::Void {
                 " " 
             } else {
                 "+"
-            }));
+            })?;
 
             for x in 0 .. s.width {
                 let piece = s.get(x, 0);
                 
-                try!(f.write_str(if piece == BoardState::Void {
+                f.write_str(if piece == BoardState::Void {
                     if s.get(x+1, 0) == BoardState::Void {
                         "  "
                     } else {
@@ -62,7 +62,7 @@ impl<'a> fmt::Display for Board<'a> {
                     }
                 } else {
                     "-+"
-                }));
+                })?;
             }
 
             f.write_str("\n")
@@ -73,38 +73,38 @@ impl<'a> fmt::Display for Board<'a> {
                 let piece = s.get(x, y);
                 
                 if x == 0 {
-                    try!(f.write_str(if piece == BoardState::Void {
+                    f.write_str(if piece == BoardState::Void {
                         " "
                     } else {
                         "|"
-                    }));
+                    })?;
                 }
 
-                try!(f.write_str(piece.rep()));
+                f.write_str(piece.rep())?;
 
-                try!(f.write_str(if piece == s.get(x+1, y) {
+                f.write_str(if piece == s.get(x+1, y) {
                     " "
                 } else {
                     "|"
-                }));
+                })?;
             }
 
-            try!(f.write_str("\n"));
+            f.write_str("\n")?;
 
             print_row_bottom_border(s, f, y)
         }
         
         fn print_row_bottom_border(s: &Board, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
-            try!(f.write_str(if s.get(0,y) == BoardState::Void {
+            f.write_str(if s.get(0,y) == BoardState::Void {
                 " " 
             } else {
                 "+"
-            }));
+            })?;
 
             for x in 0 .. s.width {
                 let piece = s.get(x, y);
                 
-                try!(f.write_str(if piece == s.get(x, y+1) {
+                f.write_str(if piece == s.get(x, y+1) {
                     if piece == s.get(x+1, y) && s.get(x, y+1) == s.get(x+1, y+1) {
                         "  "
                     } else {
@@ -112,17 +112,17 @@ impl<'a> fmt::Display for Board<'a> {
                     }
                 } else {
                     "-+"
-                }));
+                })?;
             }
 
             f.write_str("\n")
         }
 
         
-        try!(print_top_row_border(self, f));
+        print_top_row_border(self, f)?;
 
         for y in 0 .. self.height {
-            try!(print_row(self, f, y));
+            print_row(self, f, y)?;
         }
 
         Ok(())
@@ -139,7 +139,7 @@ impl<'a> Board<'a> {
     }
 
     pub fn from_file(name: &str) -> Result<Board, Error> {
-        let f = try!(File::open(name));
+        let f = File::open(name)?;
 
         let buf_file = BufReader::new(&f);
 
