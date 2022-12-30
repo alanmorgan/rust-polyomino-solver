@@ -2,6 +2,7 @@ use bit_vec::BitVec;
 
 use board::board_utils;
 use board::Board;
+use point::PointT;
 use polyomino::Polyomino;
 
 #[derive(PartialEq)]
@@ -11,16 +12,16 @@ pub enum PrintSolutions {
     PrintEveryNth(u32),
 }
 
-pub struct Solver<'a, 'b> {
-    board: &'a mut Board<'a>,
-    candidates: &'a Vec<Vec<Polyomino>>,
-    region_check: Option<&'b dyn Fn(&Board, usize) -> bool>,
+pub struct Solver<'a, 'b, T:PointT> {
+    board: &'a mut Board<'a, T>,
+    candidates: &'a Vec<Vec<Polyomino<T>>>,
+    region_check: Option<&'b dyn Fn(&Board<T>, usize) -> bool>,
     print_solutions: PrintSolutions,
     solutions_found: u32,
 }
 
-impl<'a, 'b> Solver<'a, 'b> {
-    pub fn new(b: &'a mut Board<'a>, c: &'a Vec<Vec<Polyomino>>) -> Solver<'a, 'b> {
+impl<'a, 'b, T:PointT> Solver<'a, 'b, T> {
+    pub fn new(b: &'a mut Board<'a, T>, c: &'a Vec<Vec<Polyomino<T>>>) -> Solver<'a, 'b, T> {
         Solver {
             board: b,
             candidates: c,
@@ -31,7 +32,7 @@ impl<'a, 'b> Solver<'a, 'b> {
     }
 
     #[allow(dead_code)]
-    pub fn set_region_checker(&mut self, rc: &'b dyn Fn(&Board, usize) -> bool) {
+    pub fn set_region_checker(&mut self, rc: &'b dyn Fn(&Board<T>, usize) -> bool) {
         self.region_check = Some(rc);
     }
 
@@ -94,3 +95,4 @@ impl<'a, 'b> Solver<'a, 'b> {
         }
     }
 }
+    

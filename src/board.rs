@@ -7,24 +7,25 @@ use std::io::Error;
 use std::ops::Range;
 
 use point::Point;
+use point::PointT;
 use point::PointPos;
 use polyomino::Polyomino;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum BoardState<'a> {
+pub enum BoardState<'a, T:PointT> {
     Void,  // Out of bounds/a hole in the board
     Empty, // A valid part of the board, but no piece is there
     // Checked,   // Used during get_all_adjacent
-    Full(&'a Polyomino, PointPos, PointPos), // Has a piece
+    Full(&'a Polyomino<T>, PointPos, PointPos), // Has a piece
 }
 
-impl<'a> fmt::Display for BoardState<'a> {
+impl<'a, T:PointT> fmt::Display for BoardState<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(self.rep())
     }
 }
 
-impl<'a> BoardState<'a> {
+impl<'a, T:PointT> BoardState<'a, T> {
     pub fn rep(&self) -> &str {
         match *self {
             BoardState::Void => " ",
@@ -34,15 +35,15 @@ impl<'a> BoardState<'a> {
     }
 }
 
-pub struct Board<'a> {
+pub struct Board<'a, T:PointT> {
     height: PointPos,
     width: PointPos,
-    board: Vec<BoardState<'a>>,
+    board: Vec<BoardState<'a, T>>,
 }
 
-impl<'a> fmt::Display for Board<'a> {
+impl<'a, T:PointT> fmt::Display for Board<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fn print_top_row_border(s: &Board, f: &mut fmt::Formatter) -> fmt::Result {
+        fn print_top_row_border<'a, T:PointT>(s: &Board<'a, T>, f: &mut fmt::Formatter) -> fmt::Result {
             f.write_str(if s.get(0, 0) == BoardState::Void {
                 " "
             } else {
@@ -66,7 +67,7 @@ impl<'a> fmt::Display for Board<'a> {
             f.write_str("\n")
         }
 
-        fn print_row(s: &Board, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
+        fn print_row<'a, T:PointT>(s: &Board<'a, T>, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
             for x in 0..s.width {
                 let piece = s.get(x, y);
 
@@ -84,7 +85,7 @@ impl<'a> fmt::Display for Board<'a> {
             print_row_bottom_border(s, f, y)
         }
 
-        fn print_row_bottom_border(s: &Board, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
+        fn print_row_bottom_border<'a, T:PointT>(s: &Board<'a, T>, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
             f.write_str(if s.get(0, y) == BoardState::Void {
                 " "
             } else {
@@ -108,10 +109,10 @@ impl<'a> fmt::Display for Board<'a> {
             f.write_str("\n")
         }
 
-        print_top_row_border(self, f)?;
+        print_top_row_border::<T>(self, f)?;
 
         for y in 0..self.height {
-            print_row(self, f, y)?;
+            print_row::<T>(self, f, y)?;
         }
 
         Ok(())
@@ -119,8 +120,8 @@ impl<'a> fmt::Display for Board<'a> {
 }
 
 #[allow(dead_code)]
-impl<'a> Board<'a> {
-    pub fn new(w: PointPos, h: PointPos) -> Board<'a> {
+impl<'a, T:PointT> Board<'a, T> {
+    pub fn new(w: PointPos, h: PointPos) -> Board<'a, T> {
         Board {
             height: h,
             width: w,
@@ -128,7 +129,7 @@ impl<'a> Board<'a> {
         }
     }
 
-    pub fn from_file(name: &str) -> Result<Board, Error> {
+    pub fn from_file(name: &str) -> Result<Board<T>, Error> {
         let f = File::open(name)?;
 
         let buf_file = BufReader::new(&f);
@@ -174,12 +175,12 @@ impl<'a> Board<'a> {
         self.set(x, y, BoardState::Void);
     }
 
-    fn set(&mut self, x: PointPos, y: PointPos, state: BoardState<'a>) {
+    fn set(&mut self, x: PointPos, y: PointPos, state: BoardState<'a, T>) {
         let idx = self.to_idx(x, y);
         self.board[idx] = state;
     }
 
-    pub fn get(&self, x: PointPos, y: PointPos) -> BoardState<'a> {
+    pub fn get(&self, x: PointPos, y: PointPos) -> BoardState<'a, T> {
         if self.on_board(x, y) {
             return self.board[self.to_idx(x, y)];
         }
@@ -187,24 +188,23 @@ impl<'a> Board<'a> {
         BoardState::Void
     }
 
-    pub fn add_polyomino<'b>(&mut self, p: &'a Polyomino, ll: &'b Point) -> bool {
-        if p.iter()
-            .any(|&pt| self.get(pt.x + ll.x, pt.y + ll.y) != BoardState::Empty)
+    pub fn add_polyomino<'b>(&mut self, p: &'a Polyomino<T>, ll: &'b Point) -> bool {
+        if p.iter().any(|&pt| self.get(pt.x() + ll.x(), pt.y() + ll.y()) != BoardState::Empty)
         {
             return false;
         }
 
         for pt in p.iter() {
-            self.set(pt.x + ll.x, pt.y + ll.y, BoardState::Full(p, ll.x, ll.y));
+            self.set(pt.x() + ll.x(), pt.y() + ll.y(), BoardState::Full(p, ll.x(), ll.y()));
         }
 
         true
     }
 
     pub fn remove_polyomino(&mut self, ll: &Point) {
-        if let BoardState::Full(p, start_x, start_y) = self.get(ll.x, ll.y) {
+        if let BoardState::Full(p, start_x, start_y) = self.get(ll.x(), ll.y()) {
             for pt in p.iter() {
-                self.set(pt.x + start_x, pt.y + start_y, BoardState::Empty);
+                self.set(pt.x() + start_x, pt.y() + start_y, BoardState::Empty);
             }
         }
     }
@@ -226,13 +226,14 @@ pub mod board_utils {
     use board::Board;
     use board::BoardState;
     use point::Point;
+    use point::PointT;
     use point::PointPos;
     use polyomino::Polyomino;
 
     use std::collections::HashSet;
     use std::collections::VecDeque;
 
-    pub fn get_first_unoccupied(b: &Board) -> Option<Point> {
+    pub fn get_first_unoccupied<'a, T:PointT>(b: &Board<'a, T>) -> Option<Point> {
         for i in 0..b.board.len() {
             if b.board[i] == BoardState::Empty {
                 return Some(Point::new(
@@ -245,7 +246,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn get_adjacent(p: Point, b: &Board) -> HashSet<Point> {
+    pub fn get_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> HashSet<Point> {
         let mut adj = HashSet::new();
 
         // UP
@@ -272,7 +273,7 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn get_all_adjacent(p: Point, b: &Board) -> HashSet<Point> {
+    pub fn get_all_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> HashSet<Point> {
         let mut region = HashSet::new();
 
         if b.get(p.x, p.y) != BoardState::Empty {
@@ -301,7 +302,7 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn fit<'a>(b: &mut Board<'a>, p: &'a Polyomino) -> Option<Point> {
+    pub fn fit<'a, T:PointT>(b: &mut Board<'a, T>, p: &'a Polyomino<T>) -> Option<Point> {
         /* Attempt to fit the polyomino at the first unoccuped spot on the board. */
 
         if let Some(target_pt) = get_first_unoccupied(b) {
@@ -313,7 +314,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn fit_at<'a, 'b>(b: &mut Board<'a>, p: &'a Polyomino, target_pt: &'b Point) -> bool {
+    pub fn fit_at<'a, 'b, T:PointT>(b: &mut Board<'a, T>, p: &'a Polyomino<T>, target_pt: &'b Point) -> bool {
         /* Attempt to fit the polyomino at the specified spot on the board.
 
         * This is not quite putting the polyomino's 0,0 point at the target_pt, because that point
@@ -322,11 +323,11 @@ pub mod board_utils {
         * the points are sorted) and put *that* at target_pt
         */
         if let Some(poly_pt) = p.iter().next() {
-            if poly_pt.x <= target_pt.x
-                && poly_pt.y <= target_pt.y
+            if poly_pt.x() <= target_pt.x()
+                && poly_pt.y() <= target_pt.y()
                 && b.add_polyomino(
                     p,
-                    &Point::new(target_pt.x - poly_pt.x, target_pt.y - poly_pt.y),
+                    &Point::new(target_pt.x() - poly_pt.x(), target_pt.y() - poly_pt.y()),
                 )
             {
                 return true;

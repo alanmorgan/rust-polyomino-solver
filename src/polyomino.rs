@@ -3,17 +3,18 @@ use std::collections::HashSet;
 use std::fmt;
 use std::slice::Iter;
 
+use point::PointT;
 use point::Point;
 
 #[derive(Debug, Hash, Clone, PartialEq, Eq)]
 #[allow(dead_code)]
-pub struct Polyomino {
-    points: Vec<Point>,
+pub struct Polyomino<T: PointT> {
+    points: Vec<T>,
 }
 
 #[allow(dead_code)]
-impl Polyomino {
-    pub fn new(mut p: Vec<Point>) -> Polyomino {
+impl <T:PointT> Polyomino<T> {
+    pub fn new(mut p: Vec<T>) -> Polyomino<T> {
         p.sort();
         p.dedup();
         Polyomino { points: p }
@@ -21,9 +22,9 @@ impl Polyomino {
 
     // The largest x and y in the set of points. Note: this point may not be in the polyomino
     fn bbox_top_right(&self) -> Point {
-        self.points.iter().fold(Point::min_point(), |a, p| Point {
-            x: cmp::max(a.x, p.x),
-            y: cmp::max(a.y, p.y),
+        self.points.iter().fold(Point::new(0, 0), |a, p| Point {
+            x: cmp::max(a.x(), p.x()),
+            y: cmp::max(a.y(), p.y()),
         })
     }
 
@@ -35,7 +36,7 @@ impl Polyomino {
         } = self.bbox_top_right();
         for y in 0..height + 1 {
             for x in 0..width + 1 {
-                if let Some(_p) = self.points.iter().find(|p| p.x == x && p.y == (height - y)) {
+                if let Some(_p) = self.points.iter().find(|p| p.x() == x && p.y() == (height - y)) {
                     print!("X");
                 } else {
                     print!(" ");
@@ -45,37 +46,31 @@ impl Polyomino {
         }
     }
 
-    pub fn rotate(&self) -> Polyomino {
-        let height = self.bbox_top_right().y;
+    pub fn rotate(&self) -> Polyomino<T> {
+        let height = self.bbox_top_right().y();
         Polyomino::new(
             self.points
                 .iter()
-                .map(|p| Point {
-                    x: height - p.y,
-                    y: p.x,
-                })
+                .map(|p| { let mut new_p:T = *p; new_p.set_x(height - p.y()); new_p.set_y(p.x()); new_p })
                 .collect(),
         )
     }
 
-    pub fn flip(&self) -> Polyomino {
-        let width = self.bbox_top_right().x;
+    pub fn flip(&self) -> Polyomino<T> {
+        let width = self.bbox_top_right().x();
         Polyomino::new(
             self.points
                 .iter()
-                .map(|p| Point {
-                    x: width - p.x,
-                    y: p.y,
-                })
+                .map(|p| { let mut new_p:T = *p; new_p.set_x(width - p.x()); new_p.set_y(p.y()); new_p })
                 .collect(),
         )
     }
 
-    pub fn iter(&self) -> Iter<Point> {
+    pub fn iter(&self) -> Iter<T> {
         self.points.iter()
     }
 
-    fn make_rotations(&self) -> Vec<Polyomino> {
+    fn make_rotations(&self) -> Vec<Polyomino<T>> {
         let mut res = HashSet::new();
 
         res.insert(self.clone());
@@ -87,7 +82,7 @@ impl Polyomino {
         rotations
     }
 
-    pub fn make_all_variations(&self) -> Vec<Polyomino> {
+    pub fn make_all_variations(&self) -> Vec<Polyomino<T>> {
         let mut res = HashSet::new();
 
         res.insert(self.clone());
@@ -105,7 +100,7 @@ impl Polyomino {
     }
 }
 
-impl fmt::Display for Polyomino {
+impl<T:PointT> fmt::Display for Polyomino<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Inefficient, but it hardly matters
         let Point {
@@ -114,7 +109,7 @@ impl fmt::Display for Polyomino {
         } = self.bbox_top_right();
         for y in 0..height + 1 {
             for x in 0..width + 1 {
-                if let Some(_p) = self.points.iter().find(|p| p.x == x && p.y == (height - y)) {
+                if let Some(_p) = self.points.iter().find(|p| p.x() == x && p.y() == (height - y)) {
                     write!(f, "X")?;
                 } else {
                     write!(f, " ")?;
@@ -134,6 +129,7 @@ pub mod polyomino_utils {
     use std::io::Error;
 
     use point::Point;
+    use point::PointT;
     use point::PointPos;
     use polyomino::Polyomino;
 
@@ -145,7 +141,7 @@ pub mod polyomino_utils {
     }
 
     #[allow(dead_code)]
-    pub fn build_variations(polys: &Vec<Polyomino>, restrict: Restrictions) -> Vec<Vec<Polyomino>> {
+    pub fn build_variations<T:PointT>(polys: &Vec<Polyomino<T>>, restrict: Restrictions) -> Vec<Vec<Polyomino<T>>> {
         let mut res = Vec::with_capacity(polys.len());
         let mut found_asym = false;
 
@@ -173,7 +169,7 @@ pub mod polyomino_utils {
         res
     }
 
-    pub fn read_polyomino_file(name: &str) -> Result<Vec<Polyomino>, Error> {
+    pub fn read_polyomino_file(name: &str) -> Result<Vec<Polyomino<Point>>, Error> {
         let mut res = Vec::new();
 
         let f = File::open(name)?;
@@ -213,7 +209,7 @@ pub mod polyomino_utils {
 
 #[cfg(test)]
 mod tests {
-    use point::Point;
+    use point::PointT;
     use polyomino::Polyomino;
 
     use polyomino::polyomino_utils::read_polyomino_file;
@@ -260,11 +256,11 @@ mod tests {
 
     fn build_f_pentomino() -> Polyomino {
         let mut v = Vec::new();
-        v.push(Point::new(0, 1));
-        v.push(Point::new(1, 1));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(2, 2));
-        v.push(Point::new(1, 2));
+        v.push(PointT::new(0, 1));
+        v.push(PointT::new(1, 1));
+        v.push(PointT::new(1, 0));
+        v.push(PointT::new(2, 2));
+        v.push(PointT::new(1, 2));
 
         Polyomino::new(v)
     }
@@ -272,45 +268,45 @@ mod tests {
     // Add points in different order, with duplicate
     fn build_alt_f_pentomino() -> Polyomino {
         let mut v = Vec::new();
-        v.push(Point::new(2, 2));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(1, 2));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(1, 1));
-        v.push(Point::new(0, 1));
+        v.push(PointT::new(2, 2));
+        v.push(PointT::new(1, 0));
+        v.push(PointT::new(1, 2));
+        v.push(PointT::new(1, 0));
+        v.push(PointT::new(1, 1));
+        v.push(PointT::new(0, 1));
 
         Polyomino::new(v)
     }
 
     fn build_i_pentomino() -> Polyomino {
         let mut v = Vec::new();
-        v.push(Point::new(0, 0));
-        v.push(Point::new(0, 1));
-        v.push(Point::new(0, 2));
-        v.push(Point::new(0, 3));
-        v.push(Point::new(0, 4));
+        v.push(PointT::new(0, 0));
+        v.push(PointT::new(0, 1));
+        v.push(PointT::new(0, 2));
+        v.push(PointT::new(0, 3));
+        v.push(PointT::new(0, 4));
 
         Polyomino::new(v)
     }
 
     fn build_alt_i_pentomino() -> Polyomino {
         let mut v = Vec::new();
-        v.push(Point::new(0, 4));
-        v.push(Point::new(0, 3));
-        v.push(Point::new(0, 2));
-        v.push(Point::new(0, 1));
-        v.push(Point::new(0, 0));
+        v.push(PointT::new(0, 4));
+        v.push(PointT::new(0, 3));
+        v.push(PointT::new(0, 2));
+        v.push(PointT::new(0, 1));
+        v.push(PointT::new(0, 0));
 
         Polyomino::new(v)
     }
 
     fn build_v_pentomino() -> Polyomino {
         let mut v = Vec::new();
-        v.push(Point::new(0, 0));
-        v.push(Point::new(0, 1));
-        v.push(Point::new(0, 2));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(2, 0));
+        v.push(PointT::new(0, 0));
+        v.push(PointT::new(0, 1));
+        v.push(PointT::new(0, 2));
+        v.push(PointT::new(1, 0));
+        v.push(PointT::new(2, 0));
 
         Polyomino::new(v)
     }
