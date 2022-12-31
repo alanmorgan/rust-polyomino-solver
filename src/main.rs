@@ -14,7 +14,7 @@ use polyomino::solver::Solver;
 fn main() {
     let polyomino_name = "data/pentomino.poly";
 
-    if let Ok(polyominoes) = utils::read_polyomino_file(polyomino_name) {
+    if let Ok(polyominoes) = utils::read_polyomino_file(polyomino_name, &Point::new) {
         let all_polyominoes = utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
         let _crp = &check_region_pentomino::<Point>;
         let mut b = Board::new(10, 6);

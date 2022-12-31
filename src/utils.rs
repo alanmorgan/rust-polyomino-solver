@@ -3,7 +3,6 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Error;
 
-use point::Point;
 use point::PointT;
 use point::PointPos;
 use polyomino::Polyomino;
@@ -44,7 +43,7 @@ pub fn build_variations<T:PointT>(polys: &Vec<Polyomino<T>>, restrict: Restricti
     res
 }
 
-pub fn read_polyomino_file(name: &str) -> Result<Vec<Polyomino<Point>>, Error> {
+pub fn read_polyomino_file<T:PointT>(name: &str, make_point:&dyn Fn(PointPos, PointPos) -> T ) -> Result<Vec<Polyomino<T>>, Error> {
     let mut res = Vec::new();
 
     let f = File::open(name)?;
@@ -66,7 +65,7 @@ pub fn read_polyomino_file(name: &str) -> Result<Vec<Polyomino<Point>>, Error> {
             str => {
                 for (i, c) in str.chars().enumerate() {
                     if c != ' ' {
-                        points.push(Point::new(count, i as PointPos));
+                        points.push(make_point(count, i as PointPos));
                     }
                 }
                 count += 1;
