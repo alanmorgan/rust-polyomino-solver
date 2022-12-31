@@ -6,17 +6,16 @@ use std::time::Instant;
 use polyomino::board::Board;
 use polyomino::point::Point;
 use polyomino::point::PointT;
-use polyomino::polyomino::polyomino_utils;
-use polyomino::polyomino::polyomino_utils::Restrictions;
+use polyomino::utils;
+use polyomino::utils::Restrictions;
 use polyomino::solver::PrintSolutions;
 use polyomino::solver::Solver;
 
 fn main() {
     let polyomino_name = "data/pentomino.poly";
 
-    if let Ok(polyominoes) = polyomino_utils::read_polyomino_file(polyomino_name) {
-        let all_polyominoes =
-            polyomino_utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
+    if let Ok(polyominoes) = utils::read_polyomino_file(polyomino_name) {
+        let all_polyominoes = utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
         let _crp = &check_region_pentomino::<Point>;
         let mut b = Board::new(10, 6);
         let start_time = Instant::now();
