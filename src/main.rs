@@ -8,13 +8,14 @@ use polyomino::point::Point;
 use polyomino::point::PointT;
 use polyomino::utils;
 use polyomino::utils::Restrictions;
+use polyomino::utils::PredefinedPolyominoes;
 use polyomino::solver::PrintSolutions;
 use polyomino::solver::Solver;
 
 fn main() {
     let polyomino_name = "data/pentomino.poly";
 
-    if let Ok(polyominoes) = utils::read_polyomino_file(polyomino_name, &Point::new) {
+    if let Ok(polyominoes) = utils::get_polyominoes(PredefinedPolyominoes::Pentominoes, &Point::new) {
         let all_polyominoes = utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
         let _crp = &check_region_pentomino::<Point>;
         let mut b = Board::new(10, 6);
@@ -33,7 +34,7 @@ fn main() {
             "{} solutions found in {}ms ({} solutions/second)",
             num_solutions,
             elapsed_millis,
-            (num_solutions as f64 / elapsed_millis as f64) * 1000.0
+            ((num_solutions as f64 / elapsed_millis as f64) * 1000.0).round()
         );
     } else {
         panic!("Can't find polyomino file {}", polyomino_name);

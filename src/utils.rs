@@ -1,6 +1,5 @@
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
+use std::collections::HashMap;
+use std::fs;
 use std::io::Error;
 
 use point::PointT;
@@ -43,18 +42,51 @@ pub fn build_variations<T:PointT>(polys: &Vec<Polyomino<T>>, restrict: Restricti
     res
 }
 
-pub fn read_polyomino_file<T:PointT>(name: &str, make_point:&dyn Fn(PointPos, PointPos) -> T ) -> Result<Vec<Polyomino<T>>, Error> {
+#[derive(Eq,Hash,PartialEq)]
+pub enum PredefinedPolyominoes {
+    Monominoes,
+    Dominoes,
+    Triominoes,
+    Tetrominoes,
+    Pentominoes,
+    Hexominoes,
+    Heptominoes,
+    Octominoes,
+}
+
+lazy_static! {
+    static ref HASHMAP: HashMap<PredefinedPolyominoes, &'static str> = {
+        let mut hm = HashMap::new();
+        hm.insert(PredefinedPolyominoes::Monominoes, include_str!("../data/monomino.poly"));
+        hm.insert(PredefinedPolyominoes::Dominoes, include_str!("../data/domino.poly"));
+        hm.insert(PredefinedPolyominoes::Triominoes, include_str!("../data/triomino.poly"));
+        hm.insert(PredefinedPolyominoes::Tetrominoes, include_str!("../data/tetromino.poly"));
+        hm.insert(PredefinedPolyominoes::Pentominoes, include_str!("../data/pentomino.poly"));
+        hm.insert(PredefinedPolyominoes::Hexominoes, include_str!("../data/hexomino.poly"));
+        hm.insert(PredefinedPolyominoes::Heptominoes, include_str!("../data/heptomino.poly"));
+        hm.insert(PredefinedPolyominoes::Octominoes, include_str!("../data/octomino.poly"));
+        hm
+    };
+}
+
+pub fn get_polyominoes<T:PointT>(polytype: PredefinedPolyominoes, make_point:&dyn Fn(PointPos, PointPos) -> T) -> Result<Vec<Polyomino<T>>, Error> {
+    read_polyomino_string(&HASHMAP.get(&polytype).unwrap().to_string(), make_point)
+}
+
+pub fn read_polyominoes_from_file<T:PointT>(name: &str, make_point:&dyn Fn(PointPos, PointPos) -> T ) -> Result<Vec<Polyomino<T>>, Error> {
+    let contents = fs::read_to_string(name)?;
+    
+    read_polyomino_string(&contents, make_point)
+}
+
+fn read_polyomino_string<T:PointT>(contents: &String, make_point:&dyn Fn(PointPos, PointPos) -> T) -> Result<Vec<Polyomino<T>>, Error> {
     let mut res = Vec::new();
-
-    let f = File::open(name)?;
-
-    let buff_file = BufReader::new(&f);
 
     let mut count = 0;
     let mut points = Vec::new();
 
-    for line in buff_file.lines() {
-        match line.unwrap().as_ref() {
+    for line in contents.split('\n') {
+        match line {
             // polyominoes are separated by empty lines.
             "" => {
                 res.push(Polyomino::new(points));
