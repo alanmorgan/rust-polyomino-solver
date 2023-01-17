@@ -5,18 +5,11 @@ use board::Board;
 use point::PointT;
 use polyomino::Polyomino;
 
-#[derive(PartialEq)]
-pub enum PrintSolutions {
-    PrintTotalOnly,
-    PrintAll,
-    PrintEveryNth(u32),
-}
-
 pub struct Solver<'a, T:PointT> {
     board: &'a mut Board<'a, T>,
     candidates: &'a Vec<Vec<Polyomino<T>>>,
     region_check: Option<&'a dyn Fn(&Board<T>, usize) -> bool>,
-    print_solutions: PrintSolutions,
+    callback_each_solution: Option<&'a dyn Fn(&Board<T>)>,
     solutions_found: u32,
 }
 
@@ -26,21 +19,19 @@ impl<'a, T:PointT> Solver<'a, T> {
             board: b,
             candidates: c,
             region_check: None,
-            print_solutions: PrintSolutions::PrintTotalOnly,
+            callback_each_solution: None,
             solutions_found: 0,
         }
     }
 
-    #[allow(dead_code)]
     pub fn set_region_checker(&mut self, rc: &'a dyn Fn(&Board<T>, usize) -> bool) {
         self.region_check = Some(rc);
     }
 
-    #[allow(dead_code)]
-    pub fn set_print_solutions(&mut self, print_solutions: PrintSolutions) {
-        self.print_solutions = print_solutions;
+    pub fn set_callback_function(&mut self, cb: &'a dyn Fn(&Board<T>)) {
+        self.callback_each_solution = Some(cb);
     }
-
+                                 
     pub fn solve(&mut self) -> u32 {
         let mut usable_candidates = BitVec::from_elem(self.candidates.len(), true);
 
@@ -53,18 +44,10 @@ impl<'a, T:PointT> Solver<'a, T> {
         if usable_candidates.none() {
             self.solutions_found += 1;
 
-            match self.print_solutions {
-                PrintSolutions::PrintAll => {
-                    println!("Solution {}\n{}", self.solutions_found, self.board)
-                }
-                PrintSolutions::PrintTotalOnly => (),
-                PrintSolutions::PrintEveryNth(n) => {
-                    if self.solutions_found % n == 0 {
-                        println!("Solution {}\n{}", self.solutions_found, self.board)
-                    }
-                }
+            if let Some(cb) = self.callback_each_solution {
+                cb(self.board)
             }
-
+            
             return;
         }
 

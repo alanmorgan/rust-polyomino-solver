@@ -9,7 +9,6 @@ use polyomino::point::PointT;
 use polyomino::utils;
 use polyomino::utils::Restrictions;
 use polyomino::utils::PredefinedPolyominoes;
-use polyomino::solver::PrintSolutions;
 use polyomino::solver::Solver;
 
 fn main() {
@@ -17,13 +16,12 @@ fn main() {
 
     if let Ok(polyominoes) = utils::get_polyominoes(PredefinedPolyominoes::Pentominoes, &Point::new) {
         let all_polyominoes = utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
-        let _crp = &check_region_pentomino::<Point>;
         let mut b = Board::new(10, 6);
         let start_time = Instant::now();
 
         let mut solver = Solver::new(&mut b, &all_polyominoes);
-        // solver.set_region_checker(crp);
-        solver.set_print_solutions(PrintSolutions::PrintTotalOnly);
+        // solver.set_region_checker(&check_region_pentomino::<Point>);
+        solver.set_callback_function(&call_back::<Point>);
 
         let num_solutions = solver.solve();
 
@@ -41,6 +39,12 @@ fn main() {
     }
 }
 
+#[allow(dead_code)]
+fn call_back<'a, T:PointT>(b: &Board<'a, T>) {
+    println!("{}", b)
+}
+
+#[allow(dead_code)]
 fn check_region_pentomino<'a, T:PointT>(_b: &Board<'a, T>, region_size: usize) -> bool {
     region_size % 5 == 0
 }

@@ -70,6 +70,10 @@ impl <T:PointT> Polyomino<T> {
         self.points.iter()
     }
 
+    pub fn get_nth(&self, nth: usize) -> Option<&T> {
+        self.points.get(nth)
+    }
+    
     fn make_rotations(&self) -> Vec<Polyomino<T>> {
         let mut res = HashSet::new();
 
@@ -124,44 +128,50 @@ impl<T:PointT> fmt::Display for Polyomino<T> {
 
 #[cfg(test)]
 mod tests {
-    use point::PointT;
+    use point::Point;
     use polyomino::Polyomino;
-
-    use utils::read_polyomino_file;
-
+    use utils;
+    use utils::PredefinedPolyominoes;
+    
     #[test]
     fn test_read() {
-        match read_polyomino_file("data/domino.poly") {
+        match utils::get_polyominoes(PredefinedPolyominoes::Dominoes, &Point::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 1);
             }
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/tetromino.poly") {
+        match utils::get_polyominoes(PredefinedPolyominoes::Triominoes, &Point::new) {
+            Ok(polys) => {
+                assert_eq!(polys.len(), 2);
+            }
+            Err(..) => assert!(false),
+        }
+        match utils::get_polyominoes(PredefinedPolyominoes::Tetrominoes, &Point::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 5);
             }
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/pentomino.poly") {
+        match utils::get_polyominoes(PredefinedPolyominoes::Pentominoes, &Point::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 12);
             }
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/hexomino.poly") {
+        match utils::get_polyominoes(PredefinedPolyominoes::Hexominoes, &Point::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 35);
             }
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/heptomino.poly") {
+        match utils::get_polyominoes(PredefinedPolyominoes::Heptominoes, &Point::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 108);
             }
             Err(..) => assert!(false),
         }
-        match read_polyomino_file("data/octomino.poly") {
+        match utils::get_polyominoes(PredefinedPolyominoes::Octominoes, &Point::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 369);
             }
@@ -169,59 +179,59 @@ mod tests {
         }
     }
 
-    fn build_f_pentomino() -> Polyomino {
+    fn build_f_pentomino() -> Polyomino<Point> {
         let mut v = Vec::new();
-        v.push(PointT::new(0, 1));
-        v.push(PointT::new(1, 1));
-        v.push(PointT::new(1, 0));
-        v.push(PointT::new(2, 2));
-        v.push(PointT::new(1, 2));
+        v.push(Point::new(0, 1));
+        v.push(Point::new(1, 1));
+        v.push(Point::new(1, 0));
+        v.push(Point::new(2, 2));
+        v.push(Point::new(1, 2));
 
         Polyomino::new(v)
     }
 
     // Add points in different order, with duplicate
-    fn build_alt_f_pentomino() -> Polyomino {
+    fn build_alt_f_pentomino() -> Polyomino<Point> {
         let mut v = Vec::new();
-        v.push(PointT::new(2, 2));
-        v.push(PointT::new(1, 0));
-        v.push(PointT::new(1, 2));
-        v.push(PointT::new(1, 0));
-        v.push(PointT::new(1, 1));
-        v.push(PointT::new(0, 1));
+        v.push(Point::new(2, 2));
+        v.push(Point::new(1, 0));
+        v.push(Point::new(1, 2));
+        v.push(Point::new(1, 0));
+        v.push(Point::new(1, 1));
+        v.push(Point::new(0, 1));
 
         Polyomino::new(v)
     }
 
-    fn build_i_pentomino() -> Polyomino {
+    fn build_i_pentomino() -> Polyomino<Point> {
         let mut v = Vec::new();
-        v.push(PointT::new(0, 0));
-        v.push(PointT::new(0, 1));
-        v.push(PointT::new(0, 2));
-        v.push(PointT::new(0, 3));
-        v.push(PointT::new(0, 4));
+        v.push(Point::new(0, 0));
+        v.push(Point::new(0, 1));
+        v.push(Point::new(0, 2));
+        v.push(Point::new(0, 3));
+        v.push(Point::new(0, 4));
 
         Polyomino::new(v)
     }
 
-    fn build_alt_i_pentomino() -> Polyomino {
+    fn build_alt_i_pentomino() -> Polyomino<Point> {
         let mut v = Vec::new();
-        v.push(PointT::new(0, 4));
-        v.push(PointT::new(0, 3));
-        v.push(PointT::new(0, 2));
-        v.push(PointT::new(0, 1));
-        v.push(PointT::new(0, 0));
+        v.push(Point::new(0, 4));
+        v.push(Point::new(0, 3));
+        v.push(Point::new(0, 2));
+        v.push(Point::new(0, 1));
+        v.push(Point::new(0, 0));
 
         Polyomino::new(v)
     }
 
-    fn build_v_pentomino() -> Polyomino {
+    fn build_v_pentomino() -> Polyomino<Point> {
         let mut v = Vec::new();
-        v.push(PointT::new(0, 0));
-        v.push(PointT::new(0, 1));
-        v.push(PointT::new(0, 2));
-        v.push(PointT::new(1, 0));
-        v.push(PointT::new(2, 0));
+        v.push(Point::new(0, 0));
+        v.push(Point::new(0, 1));
+        v.push(Point::new(0, 2));
+        v.push(Point::new(1, 0));
+        v.push(Point::new(2, 0));
 
         Polyomino::new(v)
     }

@@ -1,9 +1,10 @@
 use std::cmp::Ordering;
+use std::fmt;
 use std::hash::Hash;
 
 pub type PointPos = i8;
 
-pub trait PointT : Ord + PartialOrd + Copy + Hash {
+pub trait PointT : Ord + PartialOrd + Copy + Hash + fmt::Display {
     fn x(&self) -> PointPos;
     fn set_x(&mut self, x: PointPos) -> ();
     
@@ -56,6 +57,13 @@ impl PointT for Point {
     }
 }
 
+impl fmt::Display for Point {
+    fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
+        write!(f, " ")?;
+
+        Ok(())
+    }
+}
 
 #[allow(dead_code)]
 impl Point {

@@ -15,22 +15,29 @@ use polyomino::Polyomino;
 pub enum BoardState<'a, T:PointT> {
     Void,  // Out of bounds/a hole in the board
     Empty, // A valid part of the board, but no piece is there
-    // Checked,   // Used during get_all_adjacent
-    Full(&'a Polyomino<T>, PointPos, PointPos), // Has a piece
+    Full(&'a Polyomino<T>, &'a T, PointPos, PointPos), // Has a piece
 }
 
 impl<'a, T:PointT> fmt::Display for BoardState<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(self.rep())
+        f.write_str(&self.rep())
     }
 }
 
 impl<'a, T:PointT> BoardState<'a, T> {
-    pub fn rep(&self) -> &str {
+    pub fn rep(&self) -> String {
         match *self {
-            BoardState::Void => " ",
-            BoardState::Empty => ".",
-            BoardState::Full(_p, _x, _y) => " ",
+            BoardState::Void => " ".to_string(),
+            BoardState::Empty => ".".to_string(),
+            BoardState::Full(_p, pt, _x, _y) => pt.to_string(),
+        }
+    }
+
+    pub fn connected_to(&self, other : BoardState<'a, T>) -> bool {
+        match *self {
+            BoardState::Void => other == BoardState::Void,
+            BoardState::Empty => other == BoardState::Empty,
+            BoardState::Full(p, _, _, _) => if let BoardState::Full(p1, _, _, _) = other { p == p1 } else { false }
         }
     }
 }
@@ -75,9 +82,10 @@ impl<'a, T:PointT> fmt::Display for Board<'a, T> {
                     f.write_str(if piece == BoardState::Void { " " } else { "|" })?;
                 }
 
-                f.write_str(piece.rep())?;
+                f.write_str(&piece.rep())?;
 
-                f.write_str(if piece == s.get(x + 1, y) { " " } else { "|" })?;
+                // Testing equivalence should ignore the particular pt
+                f.write_str(if piece.connected_to(s.get(x + 1, y)) { " " } else { "|" })?;
             }
 
             f.write_str("\n")?;
@@ -95,8 +103,8 @@ impl<'a, T:PointT> fmt::Display for Board<'a, T> {
             for x in 0..s.width {
                 let piece = s.get(x, y);
 
-                f.write_str(if piece == s.get(x, y + 1) {
-                    if piece == s.get(x + 1, y) && s.get(x, y + 1) == s.get(x + 1, y + 1) {
+                f.write_str(if piece.connected_to(s.get(x, y + 1)) {
+                    if piece.connected_to(s.get(x + 1, y)) && s.get(x, y + 1).connected_to(s.get(x + 1, y + 1)) {
                         "  "
                     } else {
                         " +"
@@ -195,14 +203,14 @@ impl<'a, T:PointT> Board<'a, T> {
         }
 
         for pt in p.iter() {
-            self.set(pt.x() + ll.x(), pt.y() + ll.y(), BoardState::Full(p, ll.x(), ll.y()));
+            self.set(pt.x() + ll.x(), pt.y() + ll.y(), BoardState::Full(p, &pt, ll.x(), ll.y()));
         }
 
         true
     }
 
     pub fn remove_polyomino(&mut self, ll: &Point) {
-        if let BoardState::Full(p, start_x, start_y) = self.get(ll.x(), ll.y()) {
+        if let BoardState::Full(p, _, start_x, start_y) = self.get(ll.x(), ll.y()) {
             for pt in p.iter() {
                 self.set(pt.x() + start_x, pt.y() + start_y, BoardState::Empty);
             }
@@ -346,7 +354,7 @@ mod tests {
     use point::Point;
     use polyomino::Polyomino;
 
-    fn build_u() -> Polyomino {
+    fn build_u() -> Polyomino<Point> {
         let mut p = Vec::new();
         p.push(Point::new(0, 0));
         p.push(Point::new(1, 0));
@@ -357,7 +365,7 @@ mod tests {
         Polyomino::new(p)
     }
 
-    fn build_x() -> Polyomino {
+    fn build_x() -> Polyomino<Point> {
         let mut p = Vec::new();
         p.push(Point::new(1, 0));
         p.push(Point::new(1, 1));
@@ -368,7 +376,7 @@ mod tests {
         Polyomino::new(p)
     }
 
-    fn build_w() -> Polyomino {
+    fn build_w() -> Polyomino<Point> {
         let mut p = Vec::new();
         p.push(Point::new(0, 0));
         p.push(Point::new(1, 0));
@@ -379,7 +387,7 @@ mod tests {
         Polyomino::new(p)
     }
 
-    fn build_l() -> Polyomino {
+    fn build_l() -> Polyomino<Point> {
         let mut p = Vec::new();
         p.push(Point::new(0, 0));
         p.push(Point::new(0, 1));
@@ -390,7 +398,7 @@ mod tests {
         Polyomino::new(p)
     }
 
-    fn build_i() -> Polyomino {
+    fn build_i() -> Polyomino<Point> {
         let mut p = Vec::new();
         p.push(Point::new(0, 0));
         p.push(Point::new(1, 0));
@@ -401,7 +409,7 @@ mod tests {
         Polyomino::new(p)
     }
 
-    fn build_y() -> Polyomino {
+    fn build_y() -> Polyomino<Point> {
         let mut p = Vec::new();
         p.push(Point::new(0, 1));
         p.push(Point::new(1, 1));
@@ -420,12 +428,12 @@ mod tests {
         let mut b = Board::new(12, 5);
         b.add_polyomino(&w, &Point::new(0, 0));
         b.add_polyomino(&l, &Point::new(4, 0));
-        assert!(b.get(0, 0) == BoardState::Full(&w, 0, 0));
-        assert!(b.get(4, 0) == BoardState::Full(&l, 4, 0));
-        assert!(b.get(4, 3) == BoardState::Full(&l, 4, 0));
+        assert!(b.get(0, 0) == BoardState::Full(&w, w.get_nth(0).unwrap(), 0, 0));
+        assert!(b.get(4, 0) == BoardState::Full(&l, l.get_nth(0).unwrap(), 4, 0));
+        assert!(b.get(4, 3) == BoardState::Full(&l, l.get_nth(3).unwrap(), 4, 0));
         b.remove_polyomino(&Point::new(1, 1));
         assert!(b.get(0, 0) == BoardState::Empty);
-        assert!(b.get(4, 0) == BoardState::Full(&l, 4, 0));
+        assert!(b.get(4, 0) == BoardState::Full(&l, l.get_nth(0).unwrap(), 4, 0));
         b.remove_polyomino(&Point::new(4, 2));
         assert!(b.get(4, 0) == BoardState::Empty);
     }
@@ -473,7 +481,7 @@ mod tests {
 
     #[test]
     fn test_read() {
-        if let Ok(b) = Board::from_file("data/b8x8holes.board") {
+        if let Ok(b) = Board::<Point>::from_file("data/b8x8holes.board") {
             assert_eq!(b.get(0, 0), BoardState::Empty);
             assert_eq!(b.get(0, 7), BoardState::Empty);
             assert_eq!(b.get(7, 0), BoardState::Empty);
@@ -493,7 +501,7 @@ mod tests {
         // ...
         // X.X
         // X.X
-        let mut b = Board::new(3, 4);
+        let mut b = Board::<'_, Point>::new(3, 4);
 
         b.set(0, 0, BoardState::Void);
         b.set(2, 0, BoardState::Void);
