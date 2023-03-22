@@ -1,7 +1,8 @@
 use std::cmp;
-use std::collections::HashSet;
 use std::fmt;
 use std::slice::Iter;
+
+use rustc_hash::FxHashSet;
 
 use point::PointT;
 use point::Point;
@@ -75,7 +76,7 @@ impl <T:PointT> Polyomino<T> {
     }
     
     fn make_rotations(&self) -> Vec<Polyomino<T>> {
-        let mut res = HashSet::new();
+        let mut res = FxHashSet::default();
 
         res.insert(self.clone());
         res.insert(self.clone().rotate());
@@ -87,7 +88,7 @@ impl <T:PointT> Polyomino<T> {
     }
 
     pub fn make_all_variations(&self) -> Vec<Polyomino<T>> {
-        let mut res = HashSet::new();
+        let mut res = FxHashSet::default();
 
         res.insert(self.clone());
         res.insert(self.clone().rotate());

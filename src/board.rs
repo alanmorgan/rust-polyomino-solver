@@ -238,7 +238,7 @@ pub mod board_utils {
     use point::PointPos;
     use polyomino::Polyomino;
 
-    use std::collections::HashSet;
+    use rustc_hash::FxHashSet;
     use std::collections::VecDeque;
 
     pub fn get_first_unoccupied<'a, T:PointT>(b: &Board<'a, T>) -> Option<Point> {
@@ -254,8 +254,8 @@ pub mod board_utils {
         None
     }
 
-    pub fn get_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> HashSet<Point> {
-        let mut adj = HashSet::new();
+    pub fn get_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> FxHashSet<Point> {
+        let mut adj = FxHashSet::default();
 
         // UP
         if p.y != 0 && b.get(p.x, p.y - 1) == BoardState::Empty {
@@ -281,8 +281,8 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn get_all_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> HashSet<Point> {
-        let mut region = HashSet::new();
+    pub fn get_all_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> FxHashSet<Point> {
+        let mut region = FxHashSet::default();
 
         if b.get(p.x, p.y) != BoardState::Empty {
             return region;

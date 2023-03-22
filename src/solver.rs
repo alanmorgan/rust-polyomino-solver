@@ -10,7 +10,14 @@ pub struct Solver<'a, T:PointT> {
     candidates: &'a Vec<Vec<Polyomino<T>>>,
     region_check: Option<&'a dyn Fn(&Board<T>, usize) -> bool>,
     callback_each_solution: Option<&'a dyn Fn(&Board<T>)>,
+    solutions: Vec<Board<'a, T>>,
+    return_all_solutions: bool,
     solutions_found: u32,
+}
+
+pub enum SolverResult<'a, T:PointT> {
+    Count(u32),
+    Solutions(&'a Vec<Board<'a, T>>),
 }
 
 impl<'a, T:PointT> Solver<'a, T> {
@@ -20,8 +27,14 @@ impl<'a, T:PointT> Solver<'a, T> {
             candidates: c,
             region_check: None,
             callback_each_solution: None,
+            solutions: Vec::new(),
+            return_all_solutions: false,
             solutions_found: 0,
         }
+    }
+
+    pub fn set_return_all_solutions(&mut self, all_solutions: bool) {
+        self.return_all_solutions = all_solutions;
     }
 
     pub fn set_region_checker(&mut self, rc: &'a dyn Fn(&Board<T>, usize) -> bool) {
@@ -32,12 +45,17 @@ impl<'a, T:PointT> Solver<'a, T> {
         self.callback_each_solution = Some(cb);
     }
                                  
-    pub fn solve(&mut self) -> u32 {
+    pub fn solve(&'a mut self) -> SolverResult<'a, T> {
         let mut usable_candidates = BitVec::from_elem(self.candidates.len(), true);
 
         self.solve_ex(&mut usable_candidates);
 
-        self.solutions_found
+        if self.return_all_solutions {
+            SolverResult::Solutions(&self.solutions)
+        }
+        else {
+            SolverResult::Count(self.solutions_found)
+        }
     }
 
     fn solve_ex(&mut self, usable_candidates: &mut BitVec) {

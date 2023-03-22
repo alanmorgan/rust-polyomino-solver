@@ -1,6 +1,7 @@
-use std::collections::HashMap;
 use std::fs;
 use std::io::Error;
+
+use rustc_hash::FxHashMap;
 
 use point::PointT;
 use point::PointPos;
@@ -55,8 +56,8 @@ pub enum PredefinedPolyominoes {
 }
 
 lazy_static! {
-    static ref HASHMAP: HashMap<PredefinedPolyominoes, &'static str> = {
-        let mut hm = HashMap::new();
+    static ref HASHMAP: FxHashMap<PredefinedPolyominoes, &'static str> = {
+        let mut hm = FxHashMap::default();
         hm.insert(PredefinedPolyominoes::Monominoes, include_str!("../data/monomino.poly"));
         hm.insert(PredefinedPolyominoes::Dominoes, include_str!("../data/domino.poly"));
         hm.insert(PredefinedPolyominoes::Triominoes, include_str!("../data/triomino.poly"));
