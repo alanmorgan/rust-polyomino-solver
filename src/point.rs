@@ -12,32 +12,11 @@ pub trait PointT : Ord + PartialOrd + Copy + Hash + fmt::Display {
     fn set_y(&mut self, x: PointPos) -> ();
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Hash, OrdForPointT)]
 pub struct Point {
     pub x: PointPos,
     pub y: PointPos,
 }
-
-impl Ord for Point {
-    fn cmp(&self, other: &Point) -> Ordering {
-        if self.x() < other.x() {
-            return Ordering::Less;
-        }
-
-        if self.x() > other.x() {
-            return Ordering::Greater;
-        }
-
-        self.y().cmp(&other.y())
-    }
-}
-
-impl PartialOrd for Point {
-    fn partial_cmp(&self, other: &Point) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
 
 impl PointT for Point {
     fn x(&self) -> PointPos {

@@ -18,6 +18,7 @@ rand="*"
 bit-vec="*"
 lazy_static="*"
 rustc-hash="1.1.0"
+point-derive = { path = "point-derive" }
 
 [profile.release]
 debug = true
