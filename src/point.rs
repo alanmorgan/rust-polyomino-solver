@@ -2,36 +2,36 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 
-pub type PointPos = i8;
+use point_derive::OrdForPoint;
 
-pub trait PointT : Ord + PartialOrd + Copy + Hash + fmt::Display {
-    fn x(&self) -> PointPos;
-    fn set_x(&mut self, x: PointPos) -> ();
+pub trait Pt : Ord + PartialOrd + Copy + Hash + fmt::Display {
+    fn x(&self) -> i16;
+    fn set_x(&mut self, x: i16);
     
-    fn y(&self) -> PointPos;
-    fn set_y(&mut self, x: PointPos) -> ();
+    fn y(&self) -> i16;
+    fn set_y(&mut self, x: i16);
 }
 
-#[derive(Debug, Clone, Copy, Hash, OrdForPointT)]
+#[derive(Debug, Clone, Copy, OrdForPoint)]
 pub struct Point {
-    pub x: PointPos,
-    pub y: PointPos,
+    pub x: i16,
+    pub y: i16,
 }
 
-impl PointT for Point {
-    fn x(&self) -> PointPos {
+impl Pt for Point {
+    fn x(&self) -> i16 {
         self.x
     }
 
-    fn set_x(&mut self, new_x: PointPos) -> () {
+    fn set_x(&mut self, new_x: i16) {
         self.x = new_x;
     }
     
-    fn y(&self) -> PointPos {
+    fn y(&self) -> i16 {
         self.y
     }
     
-    fn set_y(&mut self, new_y: PointPos) -> () {
+    fn set_y(&mut self, new_y: i16) {
         self.y = new_y;
     }
 }
@@ -46,7 +46,7 @@ impl fmt::Display for Point {
 
 #[allow(dead_code)]
 impl Point {
-    pub fn new(new_x: PointPos, new_y: PointPos) -> Point {
+    pub fn new(new_x: i16, new_y: i16) -> Point {
         Point { x: new_x, y: new_y }
     }
 }

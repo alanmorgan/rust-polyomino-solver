@@ -2,6 +2,7 @@
 name = "polyomino"
 version = "0.0.1"
 authors = ["amorgan"]
+edition = "2021"
 
 [lib]
 name = "polyomino"
@@ -17,7 +18,7 @@ byteorder="*"
 rand="*"
 bit-vec="*"
 lazy_static="*"
-rustc-hash="1.1.0"
+rustc-hash="*"
 point-derive = { path = "point-derive" }
 
 [profile.release]

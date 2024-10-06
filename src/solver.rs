@@ -1,26 +1,29 @@
 use bit_vec::BitVec;
 
-use board::board_utils;
-use board::Board;
-use point::PointT;
-use polyomino::Polyomino;
+use crate::board::board_utils;
+use crate::board::Board;
+use crate::point::Pt;
+use crate::polyomino::Polyomino;
 
-pub struct Solver<'a, T:PointT> {
+type RegionCheckFn<T> = dyn Fn(&Board<T>, usize) -> bool;
+type SolutionCallbackFn<T> = dyn Fn(&Board<T>);
+
+pub struct Solver<'a, T:Pt> {
     board: &'a mut Board<'a, T>,
     candidates: &'a Vec<Vec<Polyomino<T>>>,
-    region_check: Option<&'a dyn Fn(&Board<T>, usize) -> bool>,
-    callback_each_solution: Option<&'a dyn Fn(&Board<T>)>,
+    region_check: Option<&'a RegionCheckFn<T>>,
+    callback_each_solution: Option<&'a SolutionCallbackFn<T>>,
     solutions: Vec<Board<'a, T>>,
     return_all_solutions: bool,
     solutions_found: u32,
 }
 
-pub enum SolverResult<'a, T:PointT> {
+pub enum SolverResult<'a, T:Pt> {
     Count(u32),
     Solutions(&'a Vec<Board<'a, T>>),
 }
 
-impl<'a, T:PointT> Solver<'a, T> {
+impl<'a, T:Pt> Solver<'a, T> {
     pub fn new(b: &'a mut Board<'a, T>, c: &'a Vec<Vec<Polyomino<T>>>) -> Solver<'a, T> {
         Solver {
             board: b,
@@ -37,11 +40,11 @@ impl<'a, T:PointT> Solver<'a, T> {
         self.return_all_solutions = all_solutions;
     }
 
-    pub fn set_region_checker(&mut self, rc: &'a dyn Fn(&Board<T>, usize) -> bool) {
+    pub fn set_region_checker(&mut self, rc: &'a RegionCheckFn<T>) {
         self.region_check = Some(rc);
     }
 
-    pub fn set_callback_function(&mut self, cb: &'a dyn Fn(&Board<T>)) {
+    pub fn set_callback_function(&mut self, cb: &'a SolutionCallbackFn<T>) {
         self.callback_each_solution = Some(cb);
     }
                                  

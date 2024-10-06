@@ -4,17 +4,17 @@ use std::slice::Iter;
 
 use rustc_hash::FxHashSet;
 
-use point::PointT;
-use point::Point;
+use crate::point::Pt;
+use crate::point::Point;
 
 #[derive(Debug, Hash, Clone, PartialEq, Eq)]
 #[allow(dead_code)]
-pub struct Polyomino<T: PointT> {
+pub struct Polyomino<T: Pt> {
     points: Vec<T>,
 }
 
 #[allow(dead_code)]
-impl <T:PointT> Polyomino<T> {
+impl <T:Pt> Polyomino<T> {
     pub fn new(mut p: Vec<T>) -> Polyomino<T> {
         p.sort();
         p.dedup();
@@ -105,7 +105,7 @@ impl <T:PointT> Polyomino<T> {
     }
 }
 
-impl<T:PointT> fmt::Display for Polyomino<T> {
+impl<T:Pt> fmt::Display for Polyomino<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Inefficient, but it hardly matters
         let Point {

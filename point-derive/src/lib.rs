@@ -1,14 +1,10 @@
-#[macro_use]
-extern crate quote;
-#[macro_use]
-extern crate syn;
-extern crate proc_macro;
-
 use proc_macro::TokenStream;
+use quote::quote;
 use syn::DeriveInput;
+use syn::parse_macro_input;
 
-#[proc_macro_derive(OrdForPointT)]
-pub fn derive_pointt_impl(token_stream: proc_macro::TokenStream) -> proc_macro::TokenStream {
+#[proc_macro_derive(OrdForPoint)]
+pub fn derive_pt_impl(token_stream: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input: syn::DeriveInput = parse_macro_input!(token_stream as DeriveInput);
     let ident = input.ident;
     let expanded = quote! {
@@ -36,6 +32,12 @@ pub fn derive_pointt_impl(token_stream: proc_macro::TokenStream) -> proc_macro::
             }
         }
         impl Eq for #ident {}
+        impl Hash for #ident {
+            fn hash<H :std::hash::Hasher>(&self, state: &mut H) {
+                self.x().hash(state);
+                self.y().hash(state);
+            }
+        }
     };
 
     TokenStream::from(expanded)

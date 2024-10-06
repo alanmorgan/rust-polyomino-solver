@@ -1,11 +1,8 @@
-extern crate bit_vec;
-extern crate polyomino;
-
 use std::time::Instant;
 
 use polyomino::board::Board;
 use polyomino::point::Point;
-use polyomino::point::PointT;
+use polyomino::point::Pt;
 use polyomino::utils;
 use polyomino::utils::Restrictions;
 use polyomino::utils::PredefinedPolyominoes;
@@ -41,11 +38,11 @@ fn main() {
 }
 
 #[allow(dead_code)]
-fn call_back<'a, T:PointT>(b: &Board<'a, T>) {
+fn call_back<T:Pt>(b: &Board<T>) {
 //    println!("{}", b)
 }
 
 #[allow(dead_code)]
-fn check_region_pentomino<'a, T:PointT>(_b: &Board<'a, T>, region_size: usize) -> bool {
+fn check_region_pentomino<T:Pt>(_b: &Board<T>, region_size: usize) -> bool {
     region_size % 5 == 0
 }

@@ -6,25 +6,24 @@ use std::io::BufReader;
 use std::io::Error;
 use std::ops::Range;
 
-use point::Point;
-use point::PointT;
-use point::PointPos;
-use polyomino::Polyomino;
+use crate::point::Point;
+use crate::point::Pt;
+use crate::polyomino::Polyomino;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum BoardState<'a, T:PointT> {
+pub enum BoardState<'a, T:Pt> {
     Void,  // Out of bounds/a hole in the board
     Empty, // A valid part of the board, but no piece is there
-    Full(&'a Polyomino<T>, &'a T, PointPos, PointPos), // Has a piece
+    Full(&'a Polyomino<T>, &'a T, i16, i16), // Has a piece
 }
 
-impl<'a, T:PointT> fmt::Display for BoardState<'a, T> {
+impl<'a, T:Pt> fmt::Display for BoardState<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.rep())
     }
 }
 
-impl<'a, T:PointT> BoardState<'a, T> {
+impl<'a, T:Pt> BoardState<'a, T> {
     pub fn rep(&self) -> String {
         match *self {
             BoardState::Void => " ".to_string(),
@@ -42,15 +41,15 @@ impl<'a, T:PointT> BoardState<'a, T> {
     }
 }
 
-pub struct Board<'a, T:PointT> {
-    height: PointPos,
-    width: PointPos,
+pub struct Board<'a, T:Pt> {
+    height: i16,
+    width: i16,
     board: Vec<BoardState<'a, T>>,
 }
 
-impl<'a, T:PointT> fmt::Display for Board<'a, T> {
+impl<'a, T:Pt> fmt::Display for Board<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fn print_top_row_border<'a, T:PointT>(s: &Board<'a, T>, f: &mut fmt::Formatter) -> fmt::Result {
+        fn print_top_row_border<T:Pt>(s: &Board<T>, f: &mut fmt::Formatter) -> fmt::Result {
             f.write_str(if s.get(0, 0) == BoardState::Void {
                 " "
             } else {
@@ -74,7 +73,7 @@ impl<'a, T:PointT> fmt::Display for Board<'a, T> {
             f.write_str("\n")
         }
 
-        fn print_row<'a, T:PointT>(s: &Board<'a, T>, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
+        fn print_row<T:Pt>(s: &Board<T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
             for x in 0..s.width {
                 let piece = s.get(x, y);
 
@@ -93,7 +92,7 @@ impl<'a, T:PointT> fmt::Display for Board<'a, T> {
             print_row_bottom_border(s, f, y)
         }
 
-        fn print_row_bottom_border<'a, T:PointT>(s: &Board<'a, T>, f: &mut fmt::Formatter, y: PointPos) -> fmt::Result {
+        fn print_row_bottom_border<T:Pt>(s: &Board<T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
             f.write_str(if s.get(0, y) == BoardState::Void {
                 " "
             } else {
@@ -128,8 +127,8 @@ impl<'a, T:PointT> fmt::Display for Board<'a, T> {
 }
 
 #[allow(dead_code)]
-impl<'a, T:PointT> Board<'a, T> {
-    pub fn new(w: PointPos, h: PointPos) -> Board<'a, T> {
+impl<'a, T:Pt> Board<'a, T> {
+    pub fn new(w: i16, h: i16) -> Board<'a, T> {
         Board {
             height: h,
             width: w,
@@ -142,13 +141,13 @@ impl<'a, T:PointT> Board<'a, T> {
 
         let buf_file = BufReader::new(&f);
 
-        let mut board_x: PointPos = 0;
-        let mut board_y: PointPos = 0;
+        let mut board_x: i16 = 0;
+        let mut board_y: i16 = 0;
         let mut lines = Vec::new();
 
         for wline in buf_file.lines() {
             let line = wline.unwrap();
-            board_x = cmp::max(board_x, line.len() as PointPos);
+            board_x = cmp::max(board_x, line.len() as i16);
             lines.push(line);
             board_y += 1;
         }
@@ -161,13 +160,13 @@ impl<'a, T:PointT> Board<'a, T> {
             // void and then mark spaces as empty
 
             for x in 0..board_x {
-                let idx = b.to_idx(x, y as i8);
+                let idx = b.to_idx(x, y as i16);
                 b.board[idx] = BoardState::Void;
             }
 
             for (x, c) in line.chars().enumerate() {
                 if c != ' ' {
-                    let idx = b.to_idx(x as PointPos, y as i8);
+                    let idx = b.to_idx(x as i16, y as i16);
                     b.board[idx] = BoardState::Empty;
                 }
             }
@@ -175,20 +174,20 @@ impl<'a, T:PointT> Board<'a, T> {
         Ok(b)
     }
 
-    fn to_idx(&self, x: PointPos, y: PointPos) -> usize {
+    fn to_idx(&self, x: i16, y: i16) -> usize {
         (x * self.height + y) as usize
     }
 
-    pub fn erase(&mut self, x: PointPos, y: PointPos) {
+    pub fn erase(&mut self, x: i16, y: i16) {
         self.set(x, y, BoardState::Void);
     }
 
-    fn set(&mut self, x: PointPos, y: PointPos, state: BoardState<'a, T>) {
+    fn set(&mut self, x: i16, y: i16, state: BoardState<'a, T>) {
         let idx = self.to_idx(x, y);
         self.board[idx] = state;
     }
 
-    pub fn get(&self, x: PointPos, y: PointPos) -> BoardState<'a, T> {
+    pub fn get(&self, x: i16, y: i16) -> BoardState<'a, T> {
         if self.on_board(x, y) {
             return self.board[self.to_idx(x, y)];
         }
@@ -203,7 +202,7 @@ impl<'a, T:PointT> Board<'a, T> {
         }
 
         for pt in p.iter() {
-            self.set(pt.x() + ll.x(), pt.y() + ll.y(), BoardState::Full(p, &pt, ll.x(), ll.y()));
+            self.set(pt.x() + ll.x(), pt.y() + ll.y(), BoardState::Full(p, pt, ll.x(), ll.y()));
         }
 
         true
@@ -217,36 +216,35 @@ impl<'a, T:PointT> Board<'a, T> {
         }
     }
 
-    fn on_board(&self, x: PointPos, y: PointPos) -> bool {
+    fn on_board(&self, x: i16, y: i16) -> bool {
         x < self.width && y < self.height
     }
 
-    pub fn row_range(&self) -> Range<PointPos> {
+    pub fn row_range(&self) -> Range<i16> {
         0..self.height
     }
 
-    pub fn col_range(&self) -> Range<PointPos> {
+    pub fn col_range(&self) -> Range<i16> {
         0..self.width
     }
 }
 
 pub mod board_utils {
-    use board::Board;
-    use board::BoardState;
-    use point::Point;
-    use point::PointT;
-    use point::PointPos;
-    use polyomino::Polyomino;
+    use crate::board::Board;
+    use crate::board::BoardState;
+    use crate::point::Point;
+    use crate::point::Pt;
+    use crate::polyomino::Polyomino;
 
     use rustc_hash::FxHashSet;
     use std::collections::VecDeque;
 
-    pub fn get_first_unoccupied<'a, T:PointT>(b: &Board<'a, T>) -> Option<Point> {
+    pub fn get_first_unoccupied<T:Pt>(b: &Board<T>) -> Option<Point> {
         for i in 0..b.board.len() {
             if b.board[i] == BoardState::Empty {
                 return Some(Point::new(
-                    i as PointPos / b.height,
-                    i as PointPos % b.height,
+                    i as i16 / b.height,
+                    i as i16 % b.height,
                 ));
             }
         }
@@ -254,7 +252,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn get_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> FxHashSet<Point> {
+    pub fn get_adjacent<T:Pt>(p: Point, b: &Board<T>) -> FxHashSet<Point> {
         let mut adj = FxHashSet::default();
 
         // UP
@@ -281,7 +279,7 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn get_all_adjacent<'a, T:PointT>(p: Point, b: &Board<'a, T>) -> FxHashSet<Point> {
+    pub fn get_all_adjacent<T:Pt>(p: Point, b: &Board<T>) -> FxHashSet<Point> {
         let mut region = FxHashSet::default();
 
         if b.get(p.x, p.y) != BoardState::Empty {
@@ -310,7 +308,7 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn fit<'a, T:PointT>(b: &mut Board<'a, T>, p: &'a Polyomino<T>) -> Option<Point> {
+    pub fn fit<'a, T:Pt>(b: &mut Board<'a, T>, p: &'a Polyomino<T>) -> Option<Point> {
         /* Attempt to fit the polyomino at the first unoccuped spot on the board. */
 
         if let Some(target_pt) = get_first_unoccupied(b) {
@@ -322,7 +320,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn fit_at<'a, 'b, T:PointT>(b: &mut Board<'a, T>, p: &'a Polyomino<T>, target_pt: &'b Point) -> bool {
+    pub fn fit_at<'a, T:Pt>(b: &mut Board<'a, T>, p: &'a Polyomino<T>, target_pt: &Point) -> bool {
         /* Attempt to fit the polyomino at the specified spot on the board.
 
         * This is not quite putting the polyomino's 0,0 point at the target_pt, because that point
