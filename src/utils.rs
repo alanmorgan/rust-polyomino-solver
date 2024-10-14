@@ -1,4 +1,5 @@
 use std::fs;
+use std::hash::Hash;
 use std::io::Error;
 
 use lazy_static::lazy_static;
@@ -7,6 +8,7 @@ use rustc_hash::FxHashMap;
 
 use crate::point::Pt;
 use crate::polyomino::Polyomino;
+use crate::polyomino::TagTrait;
 
 #[allow(dead_code)]
 pub enum Restrictions {
@@ -16,7 +18,7 @@ pub enum Restrictions {
 }
 
 #[allow(dead_code)]
-pub fn build_variations<T:Pt>(polys: &Vec<Polyomino<T>>, restrict: Restrictions) -> Vec<Vec<Polyomino<T>>> {
+pub fn build_variations<S:TagTrait, T:Pt>(polys: &Vec<Polyomino<S, T>>, restrict: Restrictions) -> Vec<Vec<Polyomino<S, T>>> {
     let mut res = Vec::with_capacity(polys.len());
     let mut found_asym = false;
 
@@ -71,17 +73,17 @@ lazy_static! {
     };
 }
 
-pub fn get_polyominoes<T:Pt>(polytype: PredefinedPolyominoes, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<T>>, Error> {
+pub fn get_polyominoes<S:TagTrait, T:Pt>(polytype: PredefinedPolyominoes, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
     read_polyomino_string(HASHMAP.get(&polytype).unwrap(), make_point)
 }
 
-pub fn read_polyominoes_from_file<T:Pt>(name: &str, make_point:&dyn Fn(i16, i16) -> T ) -> Result<Vec<Polyomino<T>>, Error> {
+pub fn read_polyominoes_from_file<S:TagTrait, T:Pt>(name: &str, make_point:&dyn Fn(i16, i16) -> T ) -> Result<Vec<Polyomino<S, T>>, Error> {
     let contents = fs::read_to_string(name)?;
     
     read_polyomino_string(&contents, make_point)
 }
 
-fn read_polyomino_string<T:Pt>(contents: &str, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<T>>, Error> {
+fn read_polyomino_string<S:TagTrait, T:Pt>(contents: &str, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
     let mut res = Vec::new();
 
     let mut count = 0;
@@ -91,7 +93,7 @@ fn read_polyomino_string<T:Pt>(contents: &str, make_point:&dyn Fn(i16, i16) -> T
         match line {
             // polyominoes are separated by empty lines.
             "" => {
-                res.push(Polyomino::new(points));
+                res.push(Polyomino::basic(points));
                 points = Vec::new();
                 count = 0;
             }
@@ -108,7 +110,7 @@ fn read_polyomino_string<T:Pt>(contents: &str, make_point:&dyn Fn(i16, i16) -> T
     }
 
     if !points.is_empty() {
-        res.push(Polyomino::new(points));
+        res.push(Polyomino::basic(points));
     }
 
     Ok(res)
