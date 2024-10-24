@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 
 use rustc_hash::FxHashMap;
 
-use crate::point::Pt;
+use crate::point::Point;
 use crate::polyomino::Polyomino;
 use crate::polyomino::TagTrait;
 
@@ -18,7 +18,7 @@ pub enum Restrictions {
 }
 
 #[allow(dead_code)]
-pub fn build_variations<S:TagTrait, T:Pt>(polys: &Vec<Polyomino<S, T>>, restrict: Restrictions) -> Vec<Vec<Polyomino<S, T>>> {
+pub fn build_variations<S:TagTrait, T:Point>(polys: &Vec<Polyomino<S, T>>, restrict: Restrictions) -> Vec<Vec<Polyomino<S, T>>> {
     let mut res = Vec::with_capacity(polys.len());
     let mut found_asym = false;
 
@@ -73,17 +73,17 @@ lazy_static! {
     };
 }
 
-pub fn get_polyominoes<S:TagTrait, T:Pt>(polytype: PredefinedPolyominoes, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
+pub fn get_polyominoes<S:TagTrait, T:Point>(polytype: PredefinedPolyominoes, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
     read_polyomino_string(HASHMAP.get(&polytype).unwrap(), make_point)
 }
 
-pub fn read_polyominoes_from_file<S:TagTrait, T:Pt>(name: &str, make_point:&dyn Fn(i16, i16) -> T ) -> Result<Vec<Polyomino<S, T>>, Error> {
+pub fn read_polyominoes_from_file<S:TagTrait, T:Point>(name: &str, make_point:&dyn Fn(i16, i16) -> T ) -> Result<Vec<Polyomino<S, T>>, Error> {
     let contents = fs::read_to_string(name)?;
     
     read_polyomino_string(&contents, make_point)
 }
 
-fn read_polyomino_string<S:TagTrait, T:Pt>(contents: &str, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
+fn read_polyomino_string<S:TagTrait, T:Point>(contents: &str, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
     let mut res = Vec::new();
 
     let mut count = 0;

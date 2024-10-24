@@ -6,25 +6,25 @@ use std::io::BufReader;
 use std::io::Error;
 use std::ops::Range;
 
+use crate::point::SimplePoint;
 use crate::point::Point;
-use crate::point::Pt;
 use crate::polyomino::Polyomino;
 use crate::polyomino::TagTrait;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum BoardState<'a, S:TagTrait, T:Pt> {
+pub enum BoardState<'a, S:TagTrait, T:Point> {
     Void,  // Out of bounds/a hole in the board
     Empty, // A valid part of the board, but no piece is there
     Full(&'a Polyomino<S, T>, &'a T, i16, i16), // Has a piece
 }
 
-impl<'a, S:TagTrait, T:Pt> fmt::Display for BoardState<'a, S, T> {
+impl<'a, S:TagTrait, T:Point> fmt::Display for BoardState<'a, S, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.rep())
     }
 }
 
-impl<'a, S:TagTrait, T:Pt> BoardState<'a, S, T> {
+impl<'a, S:TagTrait, T:Point> BoardState<'a, S, T> {
     pub fn rep(&self) -> String {
         match *self {
             BoardState::Void => " ".to_string(),
@@ -42,15 +42,15 @@ impl<'a, S:TagTrait, T:Pt> BoardState<'a, S, T> {
     }
 }
 
-pub struct Board<'a, S:TagTrait, T:Pt> {
+pub struct Board<'a, S:TagTrait, T:Point> {
     height: i16,
     width: i16,
     board: Vec<BoardState<'a, S, T>>,
 }
 
-impl<'a, S:TagTrait, T:Pt> fmt::Display for Board<'a, S, T> {
+impl<'a, S:TagTrait, T:Point> fmt::Display for Board<'a, S, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fn print_top_row_border<S:TagTrait, T:Pt>(s: &Board<S, T>, f: &mut fmt::Formatter) -> fmt::Result {
+        fn print_top_row_border<S:TagTrait, T:Point>(s: &Board<S, T>, f: &mut fmt::Formatter) -> fmt::Result {
             f.write_str(if s.get(0, 0) == BoardState::Void {
                 " "
             } else {
@@ -74,7 +74,7 @@ impl<'a, S:TagTrait, T:Pt> fmt::Display for Board<'a, S, T> {
             f.write_str("\n")
         }
 
-        fn print_row<S:TagTrait, T:Pt>(s: &Board<S, T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
+        fn print_row<S:TagTrait, T:Point>(s: &Board<S, T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
             for x in 0..s.width {
                 let piece = s.get(x, y);
 
@@ -93,7 +93,7 @@ impl<'a, S:TagTrait, T:Pt> fmt::Display for Board<'a, S, T> {
             print_row_bottom_border(s, f, y)
         }
 
-        fn print_row_bottom_border<S:TagTrait, T:Pt>(s: &Board<S, T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
+        fn print_row_bottom_border<S:TagTrait, T:Point>(s: &Board<S, T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
             f.write_str(if s.get(0, y) == BoardState::Void {
                 " "
             } else {
@@ -128,7 +128,7 @@ impl<'a, S:TagTrait, T:Pt> fmt::Display for Board<'a, S, T> {
 }
 
 #[allow(dead_code)]
-impl<'a, S:TagTrait, T:Pt> Board<'a, S, T> {
+impl<'a, S:TagTrait, T:Point> Board<'a, S, T> {
     pub fn new(w: i16, h: i16) -> Board<'a, S, T> {
         Board {
             height: h,
@@ -196,7 +196,7 @@ impl<'a, S:TagTrait, T:Pt> Board<'a, S, T> {
         BoardState::Void
     }
 
-    pub fn add_polyomino<'b>(&mut self, p: &'a Polyomino<S, T>, ll: &'b Point) -> bool {
+    pub fn add_polyomino<'b>(&mut self, p: &'a Polyomino<S, T>, ll: &'b SimplePoint) -> bool {
         if p.iter().any(|&pt| self.get(pt.x() + ll.x(), pt.y() + ll.y()) != BoardState::Empty)
         {
             return false;
@@ -209,7 +209,7 @@ impl<'a, S:TagTrait, T:Pt> Board<'a, S, T> {
         true
     }
 
-    pub fn remove_polyomino(&mut self, ll: &Point) {
+    pub fn remove_polyomino(&mut self, ll: &SimplePoint) {
         if let BoardState::Full(p, _, start_x, start_y) = self.get(ll.x(), ll.y()) {
             for pt in p.iter() {
                 self.set(pt.x() + start_x, pt.y() + start_y, BoardState::Empty);
@@ -237,15 +237,15 @@ pub mod board_utils {
 
     use crate::board::Board;
     use crate::board::BoardState;
+    use crate::point::SimplePoint;
     use crate::point::Point;
-    use crate::point::Pt;
     use crate::polyomino::Polyomino;
     use crate::polyomino::TagTrait;
 
-    pub fn get_first_unoccupied<S:TagTrait, T:Pt>(b: &Board<S, T>) -> Option<Point> {
+    pub fn get_first_unoccupied<S:TagTrait, T:Point>(b: &Board<S, T>) -> Option<SimplePoint> {
         for i in 0..b.board.len() {
             if b.board[i] == BoardState::Empty {
-                return Some(Point::new(
+                return Some(SimplePoint::new(
                     i as i16 / b.height,
                     i as i16 % b.height,
                 ));
@@ -255,41 +255,41 @@ pub mod board_utils {
         None
     }
 
-    pub fn get_adjacent<S:TagTrait, T:Pt>(p: Point, b: &Board<S, T>) -> FxHashSet<Point> {
+    pub fn get_adjacent<S:TagTrait, T:Point>(p: SimplePoint, b: &Board<S, T>) -> FxHashSet<SimplePoint> {
         let mut adj = FxHashSet::default();
 
         // UP
         if p.y != 0 && b.get(p.x, p.y - 1) == BoardState::Empty {
-            adj.insert(Point::new(p.x, p.y - 1));
+            adj.insert(SimplePoint::new(p.x, p.y - 1));
         }
 
         // LEFT
         if p.x != 0 && b.get(p.x - 1, p.y) == BoardState::Empty {
-            adj.insert(Point::new(p.x - 1, p.y));
+            adj.insert(SimplePoint::new(p.x - 1, p.y));
         }
 
         // DOWN
         if p.y != b.height - 1 && b.get(p.x, p.y + 1) == BoardState::Empty {
-            adj.insert(Point::new(p.x, p.y + 1));
+            adj.insert(SimplePoint::new(p.x, p.y + 1));
         }
 
         // RIGHT
         if p.x != b.width - 1 && b.get(p.x + 1, p.y) == BoardState::Empty {
-            adj.insert(Point::new(p.x + 1, p.y));
+            adj.insert(SimplePoint::new(p.x + 1, p.y));
         }
 
         adj
     }
 
     #[allow(dead_code)]
-    pub fn get_all_adjacent<S:TagTrait, T:Pt>(p: Point, b: &Board<S, T>) -> FxHashSet<Point> {
+    pub fn get_all_adjacent<S:TagTrait, T:Point>(p: SimplePoint, b: &Board<S, T>) -> FxHashSet<SimplePoint> {
         let mut region = FxHashSet::default();
 
         if b.get(p.x, p.y) != BoardState::Empty {
             return region;
         }
 
-        let mut pending: VecDeque<Point> = VecDeque::new();
+        let mut pending: VecDeque<SimplePoint> = VecDeque::new();
 
         pending.push_back(p);
 
@@ -311,7 +311,7 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn fit<'a, S:TagTrait, T:Pt>(b: &mut Board<'a, S, T>, p: &'a Polyomino<S, T>) -> Option<Point> {
+    pub fn fit<'a, S:TagTrait, T:Point>(b: &mut Board<'a, S, T>, p: &'a Polyomino<S, T>) -> Option<SimplePoint> {
         /* Attempt to fit the polyomino at the first unoccuped spot on the board. */
 
         if let Some(target_pt) = get_first_unoccupied(b) {
@@ -323,7 +323,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn fit_at<'a, S:TagTrait, T:Pt>(b: &mut Board<'a, S, T>, p: &'a Polyomino<S, T>, target_pt: &Point) -> bool {
+    pub fn fit_at<'a, S:TagTrait, T:Point>(b: &mut Board<'a, S, T>, p: &'a Polyomino<S, T>, target_pt: &SimplePoint) -> bool {
         /* Attempt to fit the polyomino at the specified spot on the board.
 
         * This is not quite putting the polyomino's 0,0 point at the target_pt, because that point
@@ -336,7 +336,7 @@ pub mod board_utils {
                 && poly_pt.y() <= target_pt.y()
                 && b.add_polyomino(
                     p,
-                    &Point::new(target_pt.x() - poly_pt.x(), target_pt.y() - poly_pt.y()),
+                    &SimplePoint::new(target_pt.x() - poly_pt.x(), target_pt.y() - poly_pt.y()),
                 )
             {
                 return true;
@@ -352,71 +352,71 @@ mod tests {
     use board::board_utils;
     use board::Board;
     use board::BoardState;
-    use point::Point;
+    use point::SimplePoint;
     use polyomino::Polyomino;
 
-    fn build_u() -> Polyomino<Point> {
+    fn build_u() -> Polyomino<SimplePoint> {
         let mut p = Vec::new();
-        p.push(Point::new(0, 0));
-        p.push(Point::new(1, 0));
-        p.push(Point::new(0, 1));
-        p.push(Point::new(0, 2));
-        p.push(Point::new(1, 2));
+        p.push(SimplePoint::new(0, 0));
+        p.push(SimplePoint::new(1, 0));
+        p.push(SimplePoint::new(0, 1));
+        p.push(SimplePoint::new(0, 2));
+        p.push(SimplePoint::new(1, 2));
 
         Polyomino::new(p)
     }
 
-    fn build_x() -> Polyomino<Point> {
+    fn build_x() -> Polyomino<SimplePoint> {
         let mut p = Vec::new();
-        p.push(Point::new(1, 0));
-        p.push(Point::new(1, 1));
-        p.push(Point::new(1, 2));
-        p.push(Point::new(0, 1));
-        p.push(Point::new(2, 1));
+        p.push(SimplePoint::new(1, 0));
+        p.push(SimplePoint::new(1, 1));
+        p.push(SimplePoint::new(1, 2));
+        p.push(SimplePoint::new(0, 1));
+        p.push(SimplePoint::new(2, 1));
 
         Polyomino::new(p)
     }
 
-    fn build_w() -> Polyomino<Point> {
+    fn build_w() -> Polyomino<SimplePoint> {
         let mut p = Vec::new();
-        p.push(Point::new(0, 0));
-        p.push(Point::new(1, 0));
-        p.push(Point::new(1, 1));
-        p.push(Point::new(2, 1));
-        p.push(Point::new(2, 2));
+        p.push(SimplePoint::new(0, 0));
+        p.push(SimplePoint::new(1, 0));
+        p.push(SimplePoint::new(1, 1));
+        p.push(SimplePoint::new(2, 1));
+        p.push(SimplePoint::new(2, 2));
 
         Polyomino::new(p)
     }
 
-    fn build_l() -> Polyomino<Point> {
+    fn build_l() -> Polyomino<SimplePoint> {
         let mut p = Vec::new();
-        p.push(Point::new(0, 0));
-        p.push(Point::new(0, 1));
-        p.push(Point::new(0, 2));
-        p.push(Point::new(0, 3));
-        p.push(Point::new(1, 3));
+        p.push(SimplePoint::new(0, 0));
+        p.push(SimplePoint::new(0, 1));
+        p.push(SimplePoint::new(0, 2));
+        p.push(SimplePoint::new(0, 3));
+        p.push(SimplePoint::new(1, 3));
 
         Polyomino::new(p)
     }
 
-    fn build_i() -> Polyomino<Point> {
+    fn build_i() -> Polyomino<SimplePoint> {
         let mut p = Vec::new();
-        p.push(Point::new(0, 0));
-        p.push(Point::new(1, 0));
-        p.push(Point::new(2, 0));
-        p.push(Point::new(3, 0));
-        p.push(Point::new(4, 0));
+        p.push(SimplePoint::new(0, 0));
+        p.push(SimplePoint::new(1, 0));
+        p.push(SimplePoint::new(2, 0));
+        p.push(SimplePoint::new(3, 0));
+        p.push(SimplePoint::new(4, 0));
 
         Polyomino::new(p)
     }
 
-    fn build_y() -> Polyomino<Point> {
+    fn build_y() -> Polyomino<SimplePoint> {
         let mut p = Vec::new();
-        p.push(Point::new(0, 1));
-        p.push(Point::new(1, 1));
-        p.push(Point::new(2, 1));
-        p.push(Point::new(3, 1));
-        p.push(Point::new(2, 0));
+        p.push(SimplePoint::new(0, 1));
+        p.push(SimplePoint::new(1, 1));
+        p.push(SimplePoint::new(2, 1));
+        p.push(SimplePoint::new(3, 1));
+        p.push(SimplePoint::new(2, 0));
 
         Polyomino::new(p)
     }
@@ -427,25 +427,25 @@ mod tests {
         let l = build_l();
 
         let mut b = Board::new(12, 5);
-        b.add_polyomino(&w, &Point::new(0, 0));
-        b.add_polyomino(&l, &Point::new(4, 0));
+        b.add_polyomino(&w, &SimplePoint::new(0, 0));
+        b.add_polyomino(&l, &SimplePoint::new(4, 0));
         assert!(b.get(0, 0) == BoardState::Full(&w, w.get_nth(0).unwrap(), 0, 0));
         assert!(b.get(4, 0) == BoardState::Full(&l, l.get_nth(0).unwrap(), 4, 0));
         assert!(b.get(4, 3) == BoardState::Full(&l, l.get_nth(3).unwrap(), 4, 0));
-        b.remove_polyomino(&Point::new(1, 1));
+        b.remove_polyomino(&SimplePoint::new(1, 1));
         assert!(b.get(0, 0) == BoardState::Empty);
         assert!(b.get(4, 0) == BoardState::Full(&l, l.get_nth(0).unwrap(), 4, 0));
-        b.remove_polyomino(&Point::new(4, 2));
+        b.remove_polyomino(&SimplePoint::new(4, 2));
         assert!(b.get(4, 0) == BoardState::Empty);
     }
 
     #[test]
     fn test_point_ordering_for_fit() {
         // Fit does require a particular point ordering, so let's test that here.
-        // We also test it in Point
-        let p00 = Point::new(0, 0);
-        let p07 = Point::new(0, 7);
-        let p10 = Point::new(1, 0);
+        // We also test it in SimplePoint
+        let p00 = SimplePoint::new(0, 0);
+        let p07 = SimplePoint::new(0, 7);
+        let p10 = SimplePoint::new(1, 0);
 
         assert!(p00 < p07);
         assert!(p10 > p07);
@@ -463,26 +463,26 @@ mod tests {
         let mut b = Board::new(20, 3);
         assert_eq!(
             board_utils::get_first_unoccupied(&b),
-            Some(Point::new(0, 0))
+            Some(SimplePoint::new(0, 0))
         );
         assert_eq!(board_utils::fit(&mut b, &y), None);
-        assert_eq!(board_utils::fit(&mut b, &u), Some(Point::new(0, 0)));
+        assert_eq!(board_utils::fit(&mut b, &u), Some(SimplePoint::new(0, 0)));
         assert_eq!(board_utils::fit(&mut b, &l_rot), None);
         assert_eq!(
             board_utils::get_first_unoccupied(&b),
-            Some(Point::new(1, 1))
+            Some(SimplePoint::new(1, 1))
         );
-        assert_eq!(board_utils::fit(&mut b, &x), Some(Point::new(1, 1)));
+        assert_eq!(board_utils::fit(&mut b, &x), Some(SimplePoint::new(1, 1)));
         assert_eq!(
             board_utils::get_first_unoccupied(&b),
-            Some(Point::new(3, 0))
+            Some(SimplePoint::new(3, 0))
         );
-        assert_eq!(board_utils::fit(&mut b, &i), Some(Point::new(3, 0)));
+        assert_eq!(board_utils::fit(&mut b, &i), Some(SimplePoint::new(3, 0)));
     }
 
     #[test]
     fn test_read() {
-        if let Ok(b) = Board::<Point>::from_file("data/b8x8holes.board") {
+        if let Ok(b) = Board::<SimplePoint>::from_file("data/b8x8holes.board") {
             assert_eq!(b.get(0, 0), BoardState::Empty);
             assert_eq!(b.get(0, 7), BoardState::Empty);
             assert_eq!(b.get(7, 0), BoardState::Empty);
@@ -502,7 +502,7 @@ mod tests {
         // ...
         // X.X
         // X.X
-        let mut b = Board::<'_, Point>::new(3, 4);
+        let mut b = Board::<'_, SimplePoint>::new(3, 4);
 
         b.set(0, 0, BoardState::Void);
         b.set(2, 0, BoardState::Void);
@@ -511,10 +511,10 @@ mod tests {
         b.set(0, 3, BoardState::Void);
         b.set(2, 3, BoardState::Void);
 
-        assert_eq!(board_utils::get_adjacent(Point::new(1, 1), &b).len(), 4);
+        assert_eq!(board_utils::get_adjacent(SimplePoint::new(1, 1), &b).len(), 4);
 
-        assert_eq!(board_utils::get_adjacent(Point::new(1, 3), &b).len(), 1);
+        assert_eq!(board_utils::get_adjacent(SimplePoint::new(1, 3), &b).len(), 1);
 
-        assert_eq!(board_utils::get_adjacent(Point::new(2, 1), &b).len(), 1);
+        assert_eq!(board_utils::get_adjacent(SimplePoint::new(2, 1), &b).len(), 1);
     }
 }

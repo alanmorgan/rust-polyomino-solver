@@ -4,7 +4,7 @@ use std::hash::Hash;
 
 use point_derive::OrdForPoint;
 
-pub trait Pt : Ord + PartialOrd + Copy + Hash + fmt::Display {
+pub trait Point : Ord + PartialOrd + Copy + Hash + fmt::Display {
     fn x(&self) -> i16;
     fn set_x(&mut self, x: i16);
     
@@ -13,12 +13,12 @@ pub trait Pt : Ord + PartialOrd + Copy + Hash + fmt::Display {
 }
 
 #[derive(Debug, Clone, Copy, OrdForPoint)]
-pub struct Point {
+pub struct SimplePoint {
     pub x: i16,
     pub y: i16,
 }
 
-impl Pt for Point {
+impl Point for SimplePoint {
     fn x(&self) -> i16 {
         self.x
     }
@@ -36,7 +36,7 @@ impl Pt for Point {
     }
 }
 
-impl fmt::Display for Point {
+impl fmt::Display for SimplePoint {
     fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
         write!(f, " ")?;
 
@@ -45,22 +45,22 @@ impl fmt::Display for Point {
 }
 
 #[allow(dead_code)]
-impl Point {
-    pub fn new(new_x: i16, new_y: i16) -> Point {
-        Point { x: new_x, y: new_y }
+impl SimplePoint {
+    pub fn new(new_x: i16, new_y: i16) -> SimplePoint {
+        SimplePoint { x: new_x, y: new_y }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use point::Point;
+    use point::SimplePoint;
 
     #[test]
     fn ord() {
-        let p00 = Point::new(0, 0);
-        let p07 = Point::new(0, 7);
-        let p10 = Point::new(1, 0);
-        let p16 = Point::new(1, 6);
+        let p00 = SimplePoint::new(0, 0);
+        let p07 = SimplePoint::new(0, 7);
+        let p10 = SimplePoint::new(1, 0);
+        let p16 = SimplePoint::new(1, 6);
 
         assert!(p00 < p07);
         assert!(p07 > p00);

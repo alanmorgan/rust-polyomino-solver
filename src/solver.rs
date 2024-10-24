@@ -2,14 +2,14 @@ use bit_vec::BitVec;
 
 use crate::board::board_utils;
 use crate::board::Board;
-use crate::point::Pt;
+use crate::point::Point;
 use crate::polyomino::Polyomino;
 use crate::polyomino::TagTrait;
 
 type RegionCheckFn<S, T> = dyn Fn(&Board<S, T>, usize) -> bool;
 type SolutionCallbackFn<S, T> = dyn Fn(&Board<S, T>);
 
-pub struct Solver<'a, S:TagTrait, T:Pt> {
+pub struct Solver<'a, S:TagTrait, T:Point> {
     board: &'a mut Board<'a, S, T>,
     candidates: &'a Vec<Vec<Polyomino<S, T>>>,
     region_check: Option<&'a RegionCheckFn<S, T>>,
@@ -19,12 +19,12 @@ pub struct Solver<'a, S:TagTrait, T:Pt> {
     solutions_found: u32,
 }
 
-pub enum SolverResult<'a, S:TagTrait, T:Pt> {
+pub enum SolverResult<'a, S:TagTrait, T:Point> {
     Count(u32),
     Solutions(&'a Vec<Board<'a, S, T>>),
 }
 
-impl<'a, S:TagTrait, T:Pt> Solver<'a, S, T> {
+impl<'a, S:TagTrait, T:Point> Solver<'a, S, T> {
     pub fn new(b: &'a mut Board<'a, S, T>, c: &'a Vec<Vec<Polyomino<S, T>>>) -> Solver<'a, S, T> {
         Solver {
             board: b,

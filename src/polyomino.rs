@@ -5,21 +5,21 @@ use std::slice::Iter;
 
 use rustc_hash::FxHashSet;
 
-use crate::point::Pt;
 use crate::point::Point;
+use crate::point::SimplePoint;
 
 pub trait TagTrait: PartialEq + Eq + Hash + Copy + Default {}
 impl <T> TagTrait for T where T: PartialEq + Eq + Hash + Copy + Default {}
 
 #[derive(Debug, Hash, Clone, PartialEq, Eq)]
 #[allow(dead_code)]
-pub struct Polyomino<S: TagTrait, T: Pt> {
+pub struct Polyomino<S: TagTrait, T: Point> {
     tag: S,
     points: Vec<T>,
 }
 
 #[allow(dead_code)]
-impl <S: TagTrait, T:Pt> Polyomino<S, T> {
+impl <S: TagTrait, T:Point> Polyomino<S, T> {
     pub fn new(new_tag: S, mut p: Vec<T>) -> Polyomino<S, T> {
         p.sort();
         p.dedup();
@@ -39,8 +39,8 @@ impl <S: TagTrait, T:Pt> Polyomino<S, T> {
     }
     
     // The largest x and y in the set of points. Note: this point may not be in the polyomino
-    fn bbox_top_right(&self) -> Point {
-        self.points.iter().fold(Point::new(0, 0), |a, p| Point {
+    fn bbox_top_right(&self) -> SimplePoint {
+        self.points.iter().fold(SimplePoint::new(0, 0), |a, p| SimplePoint {
             x: cmp::max(a.x(), p.x()),
             y: cmp::max(a.y(), p.y()),
         })
@@ -48,7 +48,7 @@ impl <S: TagTrait, T:Pt> Polyomino<S, T> {
 
     pub fn show(&self) {
         // Inefficient, but it hardly matters
-        let Point {
+        let SimplePoint {
             x: width,
             y: height,
         } = self.bbox_top_right();
@@ -124,10 +124,10 @@ impl <S: TagTrait, T:Pt> Polyomino<S, T> {
     }
 }
 
-impl<S:TagTrait, T:Pt> fmt::Display for Polyomino<S, T> {
+impl<S:TagTrait, T:Point> fmt::Display for Polyomino<S, T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Inefficient, but it hardly matters
-        let Point {
+        let SimplePoint {
             x: width,
             y: height,
         } = self.bbox_top_right();
@@ -148,7 +148,7 @@ impl<S:TagTrait, T:Pt> fmt::Display for Polyomino<S, T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::point::Point;
+    use crate::point::SimplePoint;
     use crate::polyomino::Polyomino;
     use crate::polyomino::TagTrait;
     use crate::utils;
@@ -156,43 +156,43 @@ mod tests {
     
     #[test]
     fn test_read() {
-        match utils::get_polyominoes(PredefinedPolyominoes::Dominoes, &Point::new) {
+        match utils::get_polyominoes(PredefinedPolyominoes::Dominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 1);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Triominoes, &Point::new) {
+        match utils::get_polyominoes(PredefinedPolyominoes::Triominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 2);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Tetrominoes, &Point::new) {
+        match utils::get_polyominoes(PredefinedPolyominoes::Tetrominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 5);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Pentominoes, &Point::new) {
+        match utils::get_polyominoes(PredefinedPolyominoes::Pentominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 12);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Hexominoes, &Point::new) {
+        match utils::get_polyominoes(PredefinedPolyominoes::Hexominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 35);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Heptominoes, &Point::new) {
+        match utils::get_polyominoes(PredefinedPolyominoes::Heptominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 108);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Octominoes, &Point::new) {
+        match utils::get_polyominoes(PredefinedPolyominoes::Octominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 369);
             }
@@ -200,59 +200,59 @@ mod tests {
         }
     }
 
-    fn build_f_pentomino() -> Polyomino<(), Point> {
+    fn build_f_pentomino() -> Polyomino<(), SimplePoint> {
         let mut v = Vec::new();
-        v.push(Point::new(0, 1));
-        v.push(Point::new(1, 1));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(2, 2));
-        v.push(Point::new(1, 2));
+        v.push(SimplePoint::new(0, 1));
+        v.push(SimplePoint::new(1, 1));
+        v.push(SimplePoint::new(1, 0));
+        v.push(SimplePoint::new(2, 2));
+        v.push(SimplePoint::new(1, 2));
 
         Polyomino::new(v)
     }
 
     // Add points in different order, with duplicate
-    fn build_alt_f_pentomino() -> Polyomino<(), Point> {
+    fn build_alt_f_pentomino() -> Polyomino<(), SimplePoint> {
         let mut v = Vec::new();
-        v.push(Point::new(2, 2));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(1, 2));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(1, 1));
-        v.push(Point::new(0, 1));
+        v.push(SimplePoint::new(2, 2));
+        v.push(SimplePoint::new(1, 0));
+        v.push(SimplePoint::new(1, 2));
+        v.push(SimplePoint::new(1, 0));
+        v.push(SimplePoint::new(1, 1));
+        v.push(SimplePoint::new(0, 1));
 
         Polyomino::new(v)
     }
 
-    fn build_i_pentomino() -> Polyomino<(), Point> {
+    fn build_i_pentomino() -> Polyomino<(), SimplePoint> {
         let mut v = Vec::new();
-        v.push(Point::new(0, 0));
-        v.push(Point::new(0, 1));
-        v.push(Point::new(0, 2));
-        v.push(Point::new(0, 3));
-        v.push(Point::new(0, 4));
+        v.push(SimplePoint::new(0, 0));
+        v.push(SimplePoint::new(0, 1));
+        v.push(SimplePoint::new(0, 2));
+        v.push(SimplePoint::new(0, 3));
+        v.push(SimplePoint::new(0, 4));
 
         Polyomino::new(v)
     }
 
-    fn build_alt_i_pentomino() -> Polyomino<Point> {
+    fn build_alt_i_pentomino() -> Polyomino<SimplePoint> {
         let mut v = Vec::new();
-        v.push(Point::new(0, 4));
-        v.push(Point::new(0, 3));
-        v.push(Point::new(0, 2));
-        v.push(Point::new(0, 1));
-        v.push(Point::new(0, 0));
+        v.push(SimplePoint::new(0, 4));
+        v.push(SimplePoint::new(0, 3));
+        v.push(SimplePoint::new(0, 2));
+        v.push(SimplePoint::new(0, 1));
+        v.push(SimplePoint::new(0, 0));
 
         Polyomino::new(v)
     }
 
-    fn build_v_pentomino() -> Polyomino<Point> {
+    fn build_v_pentomino() -> Polyomino<SimplePoint> {
         let mut v = Vec::new();
-        v.push(Point::new(0, 0));
-        v.push(Point::new(0, 1));
-        v.push(Point::new(0, 2));
-        v.push(Point::new(1, 0));
-        v.push(Point::new(2, 0));
+        v.push(SimplePoint::new(0, 0));
+        v.push(SimplePoint::new(0, 1));
+        v.push(SimplePoint::new(0, 2));
+        v.push(SimplePoint::new(1, 0));
+        v.push(SimplePoint::new(2, 0));
 
         Polyomino::new(v)
     }
