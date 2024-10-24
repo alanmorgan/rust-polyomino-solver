@@ -150,49 +150,48 @@ impl<S:TagTrait, T:Point> fmt::Display for Polyomino<S, T> {
 mod tests {
     use crate::point::SimplePoint;
     use crate::polyomino::Polyomino;
-    use crate::polyomino::TagTrait;
     use crate::utils;
     use crate::utils::PredefinedPolyominoes;
     
     #[test]
     fn test_read() {
-        match utils::get_polyominoes(PredefinedPolyominoes::Dominoes, &SimplePoint::new) {
+        match utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Dominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 1);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Triominoes, &SimplePoint::new) {
+        match utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Triominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 2);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Tetrominoes, &SimplePoint::new) {
+        match utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Tetrominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 5);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Pentominoes, &SimplePoint::new) {
+        match utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Pentominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 12);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Hexominoes, &SimplePoint::new) {
+        match utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Hexominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 35);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Heptominoes, &SimplePoint::new) {
+        match utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Heptominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 108);
             }
             Err(..) => assert!(false),
         }
-        match utils::get_polyominoes(PredefinedPolyominoes::Octominoes, &SimplePoint::new) {
+        match utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Octominoes, &SimplePoint::new) {
             Ok(polys) => {
                 assert_eq!(polys.len(), 369);
             }
@@ -208,7 +207,7 @@ mod tests {
         v.push(SimplePoint::new(2, 2));
         v.push(SimplePoint::new(1, 2));
 
-        Polyomino::new(v)
+        Polyomino::new(Default::default(), v)
     }
 
     // Add points in different order, with duplicate
@@ -221,7 +220,7 @@ mod tests {
         v.push(SimplePoint::new(1, 1));
         v.push(SimplePoint::new(0, 1));
 
-        Polyomino::new(v)
+        Polyomino::new(Default::default(), v)
     }
 
     fn build_i_pentomino() -> Polyomino<(), SimplePoint> {
@@ -232,10 +231,10 @@ mod tests {
         v.push(SimplePoint::new(0, 3));
         v.push(SimplePoint::new(0, 4));
 
-        Polyomino::new(v)
+        Polyomino::new(Default::default(), v)
     }
 
-    fn build_alt_i_pentomino() -> Polyomino<SimplePoint> {
+    fn build_alt_i_pentomino() -> Polyomino<(), SimplePoint> {
         let mut v = Vec::new();
         v.push(SimplePoint::new(0, 4));
         v.push(SimplePoint::new(0, 3));
@@ -243,10 +242,10 @@ mod tests {
         v.push(SimplePoint::new(0, 1));
         v.push(SimplePoint::new(0, 0));
 
-        Polyomino::new(v)
+        Polyomino::new(Default::default(), v)
     }
 
-    fn build_v_pentomino() -> Polyomino<SimplePoint> {
+    fn build_v_pentomino() -> Polyomino<(), SimplePoint> {
         let mut v = Vec::new();
         v.push(SimplePoint::new(0, 0));
         v.push(SimplePoint::new(0, 1));
@@ -254,7 +253,7 @@ mod tests {
         v.push(SimplePoint::new(1, 0));
         v.push(SimplePoint::new(2, 0));
 
-        Polyomino::new(v)
+        Polyomino::new(Default::default(), v)
     }
 
     #[test]
@@ -286,3 +285,19 @@ mod tests {
         assert_eq!(build_v_pentomino().make_all_variations().len(), 4);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

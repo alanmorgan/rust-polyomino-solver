@@ -349,13 +349,13 @@ pub mod board_utils {
 
 #[cfg(test)]
 mod tests {
-    use board::board_utils;
-    use board::Board;
-    use board::BoardState;
-    use point::SimplePoint;
-    use polyomino::Polyomino;
+    use crate::board::board_utils;
+    use crate::board::Board;
+    use crate::board::BoardState;
+    use crate::point::SimplePoint;
+    use crate::polyomino::Polyomino;
 
-    fn build_u() -> Polyomino<SimplePoint> {
+    fn build_u() -> Polyomino<(), SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(1, 0));
@@ -363,10 +363,10 @@ mod tests {
         p.push(SimplePoint::new(0, 2));
         p.push(SimplePoint::new(1, 2));
 
-        Polyomino::new(p)
+        Polyomino::new(Default::default(), p)
     }
 
-    fn build_x() -> Polyomino<SimplePoint> {
+    fn build_x() -> Polyomino<(), SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(1, 0));
         p.push(SimplePoint::new(1, 1));
@@ -374,10 +374,10 @@ mod tests {
         p.push(SimplePoint::new(0, 1));
         p.push(SimplePoint::new(2, 1));
 
-        Polyomino::new(p)
+        Polyomino::new(Default::default(), p)
     }
 
-    fn build_w() -> Polyomino<SimplePoint> {
+    fn build_w() -> Polyomino<(), SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(1, 0));
@@ -385,10 +385,10 @@ mod tests {
         p.push(SimplePoint::new(2, 1));
         p.push(SimplePoint::new(2, 2));
 
-        Polyomino::new(p)
+        Polyomino::new(Default::default(), p)
     }
 
-    fn build_l() -> Polyomino<SimplePoint> {
+    fn build_l() -> Polyomino<(), SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(0, 1));
@@ -396,10 +396,10 @@ mod tests {
         p.push(SimplePoint::new(0, 3));
         p.push(SimplePoint::new(1, 3));
 
-        Polyomino::new(p)
+        Polyomino::new(Default::default(), p)
     }
 
-    fn build_i() -> Polyomino<SimplePoint> {
+    fn build_i() -> Polyomino<(), SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(1, 0));
@@ -407,10 +407,10 @@ mod tests {
         p.push(SimplePoint::new(3, 0));
         p.push(SimplePoint::new(4, 0));
 
-        Polyomino::new(p)
+        Polyomino::new(Default::default(), p)
     }
 
-    fn build_y() -> Polyomino<SimplePoint> {
+    fn build_y() -> Polyomino<(), SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 1));
         p.push(SimplePoint::new(1, 1));
@@ -418,7 +418,7 @@ mod tests {
         p.push(SimplePoint::new(3, 1));
         p.push(SimplePoint::new(2, 0));
 
-        Polyomino::new(p)
+        Polyomino::new(Default::default(), p)
     }
 
     #[test]
@@ -482,7 +482,7 @@ mod tests {
 
     #[test]
     fn test_read() {
-        if let Ok(b) = Board::<SimplePoint>::from_file("data/b8x8holes.board") {
+        if let Ok(b) = Board::<(), SimplePoint>::from_file("data/b8x8holes.board") {
             assert_eq!(b.get(0, 0), BoardState::Empty);
             assert_eq!(b.get(0, 7), BoardState::Empty);
             assert_eq!(b.get(7, 0), BoardState::Empty);
@@ -502,7 +502,7 @@ mod tests {
         // ...
         // X.X
         // X.X
-        let mut b = Board::<'_, SimplePoint>::new(3, 4);
+        let mut b = Board::<'_, (), SimplePoint>::new(3, 4);
 
         b.set(0, 0, BoardState::Void);
         b.set(2, 0, BoardState::Void);
@@ -518,3 +518,21 @@ mod tests {
         assert_eq!(board_utils::get_adjacent(SimplePoint::new(2, 1), &b).len(), 1);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

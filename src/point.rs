@@ -53,7 +53,7 @@ impl SimplePoint {
 
 #[cfg(test)]
 mod tests {
-    use point::SimplePoint;
+    use crate::point::SimplePoint;
 
     #[test]
     fn ord() {
