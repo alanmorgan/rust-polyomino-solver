@@ -2,8 +2,8 @@ use std::time::Instant;
 
 use polyomino::board::Board;
 use polyomino::point::SimplePoint;
-use polyomino::point::Point;
-use polyomino::polyomino::TagTrait;
+use polyomino::polyomino::Polyomino;
+use polyomino::polyomino::SimplePolyomino;
 use polyomino::utils;
 use polyomino::utils::Restrictions;
 use polyomino::utils::PredefinedPolyominoes;
@@ -13,7 +13,7 @@ use polyomino::solver::SolverResult;
 fn main() {
     let polyomino_name = "data/pentomino.poly";
 
-    if let Ok(polyominoes) = utils::get_polyominoes::<(), SimplePoint>(PredefinedPolyominoes::Pentominoes, &SimplePoint::new) {
+    if let Ok(polyominoes) = utils::get_polyominoes::<SimplePolyomino<SimplePoint>>(PredefinedPolyominoes::Pentominoes) {
         let all_polyominoes = utils::build_variations(&polyominoes, Restrictions::RectangularSymmetry);
         let mut b = Board::new(10, 6);
         let start_time = Instant::now();
@@ -39,11 +39,11 @@ fn main() {
 }
 
 #[allow(dead_code)]
-fn call_back<S: TagTrait, T:Point>(b: &Board<S, T>) {
+fn call_back<P:Polyomino>(b: &Board<P>) {
     println!("{}", b)
 }
 
 #[allow(dead_code)]
-fn check_region_pentomino<S: TagTrait, T:Point>(_b: &Board<S, T>, region_size: usize) -> bool {
+fn check_region_pentomino<P:Polyomino>(_b: &Board<P>, region_size: usize) -> bool {
     region_size % 5 == 0
 }

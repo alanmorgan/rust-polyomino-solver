@@ -6,9 +6,7 @@ use lazy_static::lazy_static;
 
 use rustc_hash::FxHashMap;
 
-use crate::point::Point;
 use crate::polyomino::Polyomino;
-use crate::polyomino::TagTrait;
 
 #[allow(dead_code)]
 pub enum Restrictions {
@@ -18,7 +16,7 @@ pub enum Restrictions {
 }
 
 #[allow(dead_code)]
-pub fn build_variations<S:TagTrait, T:Point>(polys: &Vec<Polyomino<S, T>>, restrict: Restrictions) -> Vec<Vec<Polyomino<S, T>>> {
+pub fn build_variations<P:Polyomino>(polys: &Vec<P>, restrict: Restrictions) -> Vec<Vec<P>> {
     let mut res = Vec::with_capacity(polys.len());
     let mut found_asym = false;
 
@@ -73,17 +71,17 @@ lazy_static! {
     };
 }
 
-pub fn get_polyominoes<S:TagTrait, T:Point>(polytype: PredefinedPolyominoes, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
-    read_polyomino_string(HASHMAP.get(&polytype).unwrap(), make_point)
+pub fn get_polyominoes<P:Polyomino>(polytype: PredefinedPolyominoes) -> Result<Vec<P>, Error> {
+    read_polyomino_string(HASHMAP.get(&polytype).unwrap())
 }
 
-pub fn read_polyominoes_from_file<S:TagTrait, T:Point>(name: &str, make_point:&dyn Fn(i16, i16) -> T ) -> Result<Vec<Polyomino<S, T>>, Error> {
+pub fn read_polyominoes_from_file<P:Polyomino>(name: &str) -> Result<Vec<P>, Error> {
     let contents = fs::read_to_string(name)?;
     
-    read_polyomino_string(&contents, make_point)
+    read_polyomino_string(&contents)
 }
 
-fn read_polyomino_string<S:TagTrait, T:Point>(contents: &str, make_point:&dyn Fn(i16, i16) -> T) -> Result<Vec<Polyomino<S, T>>, Error> {
+fn read_polyomino_string<P:Polyomino>(contents: &str) -> Result<Vec<P>, Error> {
     let mut res = Vec::new();
 
     let mut count = 0;
@@ -93,7 +91,7 @@ fn read_polyomino_string<S:TagTrait, T:Point>(contents: &str, make_point:&dyn Fn
         match line {
             // polyominoes are separated by empty lines.
             "" => {
-                res.push(Polyomino::basic(points));
+                res.push(P::new(points));
                 points = Vec::new();
                 count = 0;
             }
@@ -101,7 +99,7 @@ fn read_polyomino_string<S:TagTrait, T:Point>(contents: &str, make_point:&dyn Fn
             str => {
                 for (i, c) in str.chars().enumerate() {
                     if c != ' ' {
-                        points.push(make_point(count, i as i16));
+                        points.push(P::make_point(count, i as i16));
                     }
                 }
                 count += 1;
@@ -110,7 +108,7 @@ fn read_polyomino_string<S:TagTrait, T:Point>(contents: &str, make_point:&dyn Fn
     }
 
     if !points.is_empty() {
-        res.push(Polyomino::basic(points));
+        res.push(P::new(points));
     }
 
     Ok(res)

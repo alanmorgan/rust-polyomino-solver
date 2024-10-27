@@ -5,6 +5,8 @@ use std::hash::Hash;
 use point_derive::OrdForPoint;
 
 pub trait Point : Ord + PartialOrd + Copy + Hash + fmt::Display {
+    fn new(x: i16, y: i16) -> Self;
+    
     fn x(&self) -> i16;
     fn set_x(&mut self, x: i16);
     
@@ -19,6 +21,10 @@ pub struct SimplePoint {
 }
 
 impl Point for SimplePoint {
+    fn new(new_x: i16, new_y: i16) -> SimplePoint {
+        SimplePoint { x: new_x, y: new_y }
+    }
+    
     fn x(&self) -> i16 {
         self.x
     }
@@ -44,15 +50,9 @@ impl fmt::Display for SimplePoint {
     }
 }
 
-#[allow(dead_code)]
-impl SimplePoint {
-    pub fn new(new_x: i16, new_y: i16) -> SimplePoint {
-        SimplePoint { x: new_x, y: new_y }
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::point::Point;
     use crate::point::SimplePoint;
 
     #[test]

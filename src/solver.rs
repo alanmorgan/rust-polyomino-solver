@@ -2,30 +2,28 @@ use bit_vec::BitVec;
 
 use crate::board::board_utils;
 use crate::board::Board;
-use crate::point::Point;
 use crate::polyomino::Polyomino;
-use crate::polyomino::TagTrait;
 
-type RegionCheckFn<S, T> = dyn Fn(&Board<S, T>, usize) -> bool;
-type SolutionCallbackFn<S, T> = dyn Fn(&Board<S, T>);
+type RegionCheckFn<T> = dyn Fn(&Board<T>, usize) -> bool;
+type SolutionCallbackFn<T> = dyn Fn(&Board<T>);
 
-pub struct Solver<'a, S:TagTrait, T:Point> {
-    board: &'a mut Board<'a, S, T>,
-    candidates: &'a Vec<Vec<Polyomino<S, T>>>,
-    region_check: Option<&'a RegionCheckFn<S, T>>,
-    callback_each_solution: Option<&'a SolutionCallbackFn<S, T>>,
-    solutions: Vec<Board<'a, S, T>>,
+pub struct Solver<'a, P:Polyomino> {
+    board: &'a mut Board<'a, P>,
+    candidates: &'a Vec<Vec<P>>,
+    region_check: Option<&'a RegionCheckFn<P>>,
+    callback_each_solution: Option<&'a SolutionCallbackFn<P>>,
+    solutions: Vec<Board<'a, P>>,
     return_all_solutions: bool,
     solutions_found: u32,
 }
 
-pub enum SolverResult<'a, S:TagTrait, T:Point> {
+pub enum SolverResult<'a, P:Polyomino> {
     Count(u32),
-    Solutions(&'a Vec<Board<'a, S, T>>),
+    Solutions(&'a Vec<Board<'a, P>>),
 }
 
-impl<'a, S:TagTrait, T:Point> Solver<'a, S, T> {
-    pub fn new(b: &'a mut Board<'a, S, T>, c: &'a Vec<Vec<Polyomino<S, T>>>) -> Solver<'a, S, T> {
+impl<'a, P:Polyomino> Solver<'a, P> {
+    pub fn new(b: &'a mut Board<'a, P>, c: &'a Vec<Vec<P>>) -> Solver<'a, P> {
         Solver {
             board: b,
             candidates: c,
@@ -41,15 +39,15 @@ impl<'a, S:TagTrait, T:Point> Solver<'a, S, T> {
         self.return_all_solutions = all_solutions;
     }
 
-    pub fn set_region_checker(&mut self, rc: &'a RegionCheckFn<S, T>) {
+    pub fn set_region_checker(&mut self, rc: &'a RegionCheckFn<P>) {
         self.region_check = Some(rc);
     }
 
-    pub fn set_callback_function(&mut self, cb: &'a SolutionCallbackFn<S, T>) {
+    pub fn set_callback_function(&mut self, cb: &'a SolutionCallbackFn<P>) {
         self.callback_each_solution = Some(cb);
     }
                                  
-    pub fn solve(&'a mut self) -> SolverResult<'a, S, T> {
+    pub fn solve(&'a mut self) -> SolverResult<'a, P> {
         let mut usable_candidates = BitVec::from_elem(self.candidates.len(), true);
 
         self.solve_ex(&mut usable_candidates);

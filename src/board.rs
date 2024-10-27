@@ -6,34 +6,35 @@ use std::io::BufReader;
 use std::io::Error;
 use std::ops::Range;
 
-use crate::point::SimplePoint;
 use crate::point::Point;
+use crate::point::SimplePoint;
 use crate::polyomino::Polyomino;
-use crate::polyomino::TagTrait;
 
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum BoardState<'a, S:TagTrait, T:Point> {
+#[derive(Clone, PartialEq, Debug)]
+pub enum BoardState<'a, P: Polyomino> {
     Void,  // Out of bounds/a hole in the board
     Empty, // A valid part of the board, but no piece is there
-    Full(&'a Polyomino<S, T>, &'a T, i16, i16), // Has a piece
+    Full(&'a P, &'a P::Pt, i16, i16), // Has a piece
 }
 
-impl<'a, S:TagTrait, T:Point> fmt::Display for BoardState<'a, S, T> {
+impl <'a, P> Copy for BoardState<'a, P> where P: Polyomino {}
+
+impl<'a, P:Polyomino> fmt::Display for BoardState<'a, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.rep())
     }
 }
 
-impl<'a, S:TagTrait, T:Point> BoardState<'a, S, T> {
+impl<'a, P:Polyomino> BoardState<'a, P> {
     pub fn rep(&self) -> String {
         match *self {
             BoardState::Void => " ".to_string(),
             BoardState::Empty => ".".to_string(),
-            BoardState::Full(_p, pt, _x, _y) => pt.to_string(),
+            BoardState::Full(_, pt, _, _) => pt.to_string(),
         }
     }
 
-    pub fn connected_to(&self, other : BoardState<'a, S, T>) -> bool {
+    pub fn connected_to(&self, other : BoardState<'a, P>) -> bool {
         match *self {
             BoardState::Void => other == BoardState::Void,
             BoardState::Empty => other == BoardState::Empty,
@@ -42,15 +43,15 @@ impl<'a, S:TagTrait, T:Point> BoardState<'a, S, T> {
     }
 }
 
-pub struct Board<'a, S:TagTrait, T:Point> {
+pub struct Board<'a, P:Polyomino> {
     height: i16,
     width: i16,
-    board: Vec<BoardState<'a, S, T>>,
+    board: Vec<BoardState<'a, P>>,
 }
 
-impl<'a, S:TagTrait, T:Point> fmt::Display for Board<'a, S, T> {
+impl<'a, P:Polyomino> fmt::Display for Board<'a, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fn print_top_row_border<S:TagTrait, T:Point>(s: &Board<S, T>, f: &mut fmt::Formatter) -> fmt::Result {
+        fn print_top_row_border<P: Polyomino>(s: &Board<P>, f: &mut fmt::Formatter) -> fmt::Result {
             f.write_str(if s.get(0, 0) == BoardState::Void {
                 " "
             } else {
@@ -74,7 +75,7 @@ impl<'a, S:TagTrait, T:Point> fmt::Display for Board<'a, S, T> {
             f.write_str("\n")
         }
 
-        fn print_row<S:TagTrait, T:Point>(s: &Board<S, T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
+        fn print_row<P:Polyomino>(s: &Board<P>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
             for x in 0..s.width {
                 let piece = s.get(x, y);
 
@@ -93,7 +94,7 @@ impl<'a, S:TagTrait, T:Point> fmt::Display for Board<'a, S, T> {
             print_row_bottom_border(s, f, y)
         }
 
-        fn print_row_bottom_border<S:TagTrait, T:Point>(s: &Board<S, T>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
+        fn print_row_bottom_border<P:Polyomino>(s: &Board<P>, f: &mut fmt::Formatter, y: i16) -> fmt::Result {
             f.write_str(if s.get(0, y) == BoardState::Void {
                 " "
             } else {
@@ -117,10 +118,10 @@ impl<'a, S:TagTrait, T:Point> fmt::Display for Board<'a, S, T> {
             f.write_str("\n")
         }
 
-        print_top_row_border::<S, T>(self, f)?;
+        print_top_row_border(self, f)?;
 
         for y in 0..self.height {
-            print_row::<S, T>(self, f, y)?;
+            print_row(self, f, y)?;
         }
 
         Ok(())
@@ -128,8 +129,8 @@ impl<'a, S:TagTrait, T:Point> fmt::Display for Board<'a, S, T> {
 }
 
 #[allow(dead_code)]
-impl<'a, S:TagTrait, T:Point> Board<'a, S, T> {
-    pub fn new(w: i16, h: i16) -> Board<'a, S, T> {
+impl<'a, P:Polyomino> Board<'a, P> {
+    pub fn new(w: i16, h: i16) -> Board<'a, P> {
         Board {
             height: h,
             width: w,
@@ -137,7 +138,7 @@ impl<'a, S:TagTrait, T:Point> Board<'a, S, T> {
         }
     }
 
-    pub fn from_file(name: &str) -> Result<Board<S, T>, Error> {
+    pub fn from_file(name: &str) -> Result<Board<P>, Error> {
         let f = File::open(name)?;
 
         let buf_file = BufReader::new(&f);
@@ -183,12 +184,12 @@ impl<'a, S:TagTrait, T:Point> Board<'a, S, T> {
         self.set(x, y, BoardState::Void);
     }
 
-    fn set(&mut self, x: i16, y: i16, state: BoardState<'a, S, T>) {
+    fn set(&mut self, x: i16, y: i16, state: BoardState<'a, P>) {
         let idx = self.to_idx(x, y);
         self.board[idx] = state;
     }
 
-    pub fn get(&self, x: i16, y: i16) -> BoardState<'a, S, T> {
+    pub fn get(&self, x: i16, y: i16) -> BoardState<'a, P> {
         if self.on_board(x, y) {
             return self.board[self.to_idx(x, y)];
         }
@@ -196,7 +197,7 @@ impl<'a, S:TagTrait, T:Point> Board<'a, S, T> {
         BoardState::Void
     }
 
-    pub fn add_polyomino<'b>(&mut self, p: &'a Polyomino<S, T>, ll: &'b SimplePoint) -> bool {
+    pub fn add_polyomino<'b>(&mut self, p: &'a P, ll: &'b SimplePoint) -> bool {
         if p.iter().any(|&pt| self.get(pt.x() + ll.x(), pt.y() + ll.y()) != BoardState::Empty)
         {
             return false;
@@ -240,9 +241,8 @@ pub mod board_utils {
     use crate::point::SimplePoint;
     use crate::point::Point;
     use crate::polyomino::Polyomino;
-    use crate::polyomino::TagTrait;
 
-    pub fn get_first_unoccupied<S:TagTrait, T:Point>(b: &Board<S, T>) -> Option<SimplePoint> {
+    pub fn get_first_unoccupied<P:Polyomino>(b: &Board<P>) -> Option<SimplePoint> {
         for i in 0..b.board.len() {
             if b.board[i] == BoardState::Empty {
                 return Some(SimplePoint::new(
@@ -255,7 +255,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn get_adjacent<S:TagTrait, T:Point>(p: SimplePoint, b: &Board<S, T>) -> FxHashSet<SimplePoint> {
+    pub fn get_adjacent<P:Polyomino>(p: SimplePoint, b: &Board<P>) -> FxHashSet<SimplePoint> {
         let mut adj = FxHashSet::default();
 
         // UP
@@ -282,7 +282,7 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn get_all_adjacent<S:TagTrait, T:Point>(p: SimplePoint, b: &Board<S, T>) -> FxHashSet<SimplePoint> {
+    pub fn get_all_adjacent<P:Polyomino>(p: SimplePoint, b: &Board<P>) -> FxHashSet<SimplePoint> {
         let mut region = FxHashSet::default();
 
         if b.get(p.x, p.y) != BoardState::Empty {
@@ -311,7 +311,7 @@ pub mod board_utils {
     }
 
     #[allow(dead_code)]
-    pub fn fit<'a, S:TagTrait, T:Point>(b: &mut Board<'a, S, T>, p: &'a Polyomino<S, T>) -> Option<SimplePoint> {
+    pub fn fit<'a, P:Polyomino>(b: &mut Board<'a, P>, p: &'a P) -> Option<SimplePoint> {
         /* Attempt to fit the polyomino at the first unoccuped spot on the board. */
 
         if let Some(target_pt) = get_first_unoccupied(b) {
@@ -323,7 +323,7 @@ pub mod board_utils {
         None
     }
 
-    pub fn fit_at<'a, S:TagTrait, T:Point>(b: &mut Board<'a, S, T>, p: &'a Polyomino<S, T>, target_pt: &SimplePoint) -> bool {
+    pub fn fit_at<'a, P:Polyomino>(b: &mut Board<'a, P>, p: &'a P, target_pt: &SimplePoint) -> bool {
         /* Attempt to fit the polyomino at the specified spot on the board.
 
         * This is not quite putting the polyomino's 0,0 point at the target_pt, because that point
@@ -352,10 +352,12 @@ mod tests {
     use crate::board::board_utils;
     use crate::board::Board;
     use crate::board::BoardState;
+    use crate::point::Point;
     use crate::point::SimplePoint;
     use crate::polyomino::Polyomino;
+    use crate::polyomino::SimplePolyomino;
 
-    fn build_u() -> Polyomino<(), SimplePoint> {
+    fn build_u() -> SimplePolyomino<SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(1, 0));
@@ -363,10 +365,10 @@ mod tests {
         p.push(SimplePoint::new(0, 2));
         p.push(SimplePoint::new(1, 2));
 
-        Polyomino::new(Default::default(), p)
+        SimplePolyomino::new(p)
     }
 
-    fn build_x() -> Polyomino<(), SimplePoint> {
+    fn build_x() -> SimplePolyomino<SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(1, 0));
         p.push(SimplePoint::new(1, 1));
@@ -374,10 +376,10 @@ mod tests {
         p.push(SimplePoint::new(0, 1));
         p.push(SimplePoint::new(2, 1));
 
-        Polyomino::new(Default::default(), p)
+        SimplePolyomino::new(p)
     }
 
-    fn build_w() -> Polyomino<(), SimplePoint> {
+    fn build_w() -> SimplePolyomino<SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(1, 0));
@@ -385,10 +387,10 @@ mod tests {
         p.push(SimplePoint::new(2, 1));
         p.push(SimplePoint::new(2, 2));
 
-        Polyomino::new(Default::default(), p)
+        SimplePolyomino::new(p)
     }
 
-    fn build_l() -> Polyomino<(), SimplePoint> {
+    fn build_l() -> SimplePolyomino<SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(0, 1));
@@ -396,10 +398,10 @@ mod tests {
         p.push(SimplePoint::new(0, 3));
         p.push(SimplePoint::new(1, 3));
 
-        Polyomino::new(Default::default(), p)
+        SimplePolyomino::new(p)
     }
 
-    fn build_i() -> Polyomino<(), SimplePoint> {
+    fn build_i() -> SimplePolyomino<SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
         p.push(SimplePoint::new(1, 0));
@@ -407,10 +409,10 @@ mod tests {
         p.push(SimplePoint::new(3, 0));
         p.push(SimplePoint::new(4, 0));
 
-        Polyomino::new(Default::default(), p)
+        SimplePolyomino::new(p)
     }
 
-    fn build_y() -> Polyomino<(), SimplePoint> {
+    fn build_y() -> SimplePolyomino<SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 1));
         p.push(SimplePoint::new(1, 1));
@@ -418,7 +420,7 @@ mod tests {
         p.push(SimplePoint::new(3, 1));
         p.push(SimplePoint::new(2, 0));
 
-        Polyomino::new(Default::default(), p)
+        SimplePolyomino::new(p)
     }
 
     #[test]
@@ -482,7 +484,7 @@ mod tests {
 
     #[test]
     fn test_read() {
-        if let Ok(b) = Board::<(), SimplePoint>::from_file("data/b8x8holes.board") {
+        if let Ok(b) = Board::<SimplePolyomino<SimplePoint>>::from_file("data/b8x8holes.board") {
             assert_eq!(b.get(0, 0), BoardState::Empty);
             assert_eq!(b.get(0, 7), BoardState::Empty);
             assert_eq!(b.get(7, 0), BoardState::Empty);
@@ -502,7 +504,7 @@ mod tests {
         // ...
         // X.X
         // X.X
-        let mut b = Board::<'_, (), SimplePoint>::new(3, 4);
+        let mut b = Board::<SimplePolyomino<SimplePoint>>::new(3, 4);
 
         b.set(0, 0, BoardState::Void);
         b.set(2, 0, BoardState::Void);
