@@ -14,7 +14,7 @@ use crate::polyomino::Polyomino;
 pub enum BoardState<'a, P: Polyomino> {
     Void,  // Out of bounds/a hole in the board
     Empty, // A valid part of the board, but no piece is there
-    Full(&'a P, &'a P::Pt, i16, i16), // Has a piece
+    Full(&'a P, usize, i16, i16), // Has a piece
 }
 
 impl <'a, P> Copy for BoardState<'a, P> where P: Polyomino {}
@@ -30,7 +30,7 @@ impl<'a, P:Polyomino> BoardState<'a, P> {
         match *self {
             BoardState::Void => " ".to_string(),
             BoardState::Empty => ".".to_string(),
-            BoardState::Full(_, pt, _, _) => pt.to_string(),
+            BoardState::Full(poly, pt_idx, _, _) => poly.get_nth(pt_idx).unwrap().to_string(),
         }
     }
 
@@ -203,8 +203,8 @@ impl<'a, P:Polyomino> Board<'a, P> {
             return false;
         }
 
-        for pt in p.iter() {
-            self.set(pt.x() + ll.x(), pt.y() + ll.y(), BoardState::Full(p, pt, ll.x(), ll.y()));
+        for (idx, pt) in p.iter().enumerate() {
+            self.set(pt.x() + ll.x(), pt.y() + ll.y(), BoardState::Full(p, idx, ll.x(), ll.y()));
         }
 
         true
@@ -222,6 +222,14 @@ impl<'a, P:Polyomino> Board<'a, P> {
         x < self.width && y < self.height
     }
 
+    pub fn get_height(&self) -> i16 {
+        self.height
+    }
+
+    pub fn get_width(&self) -> i16 {
+        self.width
+    }
+    
     pub fn row_range(&self) -> Range<i16> {
         0..self.height
     }
@@ -431,12 +439,12 @@ mod tests {
         let mut b = Board::new(12, 5);
         b.add_polyomino(&w, &SimplePoint::new(0, 0));
         b.add_polyomino(&l, &SimplePoint::new(4, 0));
-        assert!(b.get(0, 0) == BoardState::Full(&w, w.get_nth(0).unwrap(), 0, 0));
-        assert!(b.get(4, 0) == BoardState::Full(&l, l.get_nth(0).unwrap(), 4, 0));
-        assert!(b.get(4, 3) == BoardState::Full(&l, l.get_nth(3).unwrap(), 4, 0));
+        assert!(b.get(0, 0) == BoardState::Full(&w, 0, 0, 0));
+        assert!(b.get(4, 0) == BoardState::Full(&l, 0, 4, 0));
+        assert!(b.get(4, 3) == BoardState::Full(&l, 3, 4, 0));
         b.remove_polyomino(&SimplePoint::new(1, 1));
         assert!(b.get(0, 0) == BoardState::Empty);
-        assert!(b.get(4, 0) == BoardState::Full(&l, l.get_nth(0).unwrap(), 4, 0));
+        assert!(b.get(4, 0) == BoardState::Full(&l, 0, 4, 0));
         b.remove_polyomino(&SimplePoint::new(4, 2));
         assert!(b.get(4, 0) == BoardState::Empty);
     }
