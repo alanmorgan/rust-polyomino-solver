@@ -18,8 +18,6 @@ pub trait Polyomino : Sized + fmt::Display + Hash + Clone + PartialEq + Eq {
 
     fn set_points(&mut self, pts: Vec<Self::Pt>);
 
-    fn make_point(x: i16, y: i16) -> Self::Pt;
-
     fn get_nth(&self, n: usize) -> Option<&Self::Pt>;
     
     // The largest x and y in the set of points. Note: this point may not be in the polyomino
@@ -131,10 +129,6 @@ impl <T: Point> Polyomino for SimplePolyomino<T> {
         points.sort();
         points.dedup();
         self.points = points;
-    }
-
-    fn make_point(x: i16, y: i16) -> Self::Pt {
-        Self::Pt::new(x, y)
     }
 }
 

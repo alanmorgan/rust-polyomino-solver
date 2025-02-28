@@ -6,6 +6,7 @@ use lazy_static::lazy_static;
 
 use rustc_hash::FxHashMap;
 
+use crate::point::Point;
 use crate::polyomino::Polyomino;
 
 #[allow(dead_code)]
@@ -99,7 +100,7 @@ fn read_polyomino_string<P:Polyomino>(contents: &str) -> Result<Vec<P>, Error> {
             str => {
                 for (i, c) in str.chars().enumerate() {
                     if c != ' ' {
-                        points.push(P::make_point(count, i as i16));
+                        points.push(P::Pt::new(count, i as i16));
                     }
                 }
                 count += 1;
