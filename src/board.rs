@@ -43,6 +43,7 @@ impl<'a, P:Polyomino> BoardState<'a, P> {
     }
 }
 
+#[derive(Clone)]
 pub struct Board<'a, P:Polyomino> {
     height: i16,
     width: i16,
