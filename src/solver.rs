@@ -13,7 +13,8 @@ pub struct Solver<'a, P:Polyomino> {
     region_check: Option<&'a RegionCheckFn<P>>,
     callback_each_solution: Option<&'a SolutionCallbackFn<P>>,
     solutions: Vec<Board<'a, P>>,
-    solutions_found: u32,
+    enumerate_solutions: bool,
+    num_solutions: u32,
 }
 
 impl<'a, P:Polyomino> Solver<'a, P> {
@@ -24,7 +25,8 @@ impl<'a, P:Polyomino> Solver<'a, P> {
             region_check: None,
             callback_each_solution: None,
             solutions: Vec::new(),
-            solutions_found: 0,
+            enumerate_solutions: false,
+            num_solutions: 0,
         }
     }
 
@@ -36,9 +38,19 @@ impl<'a, P:Polyomino> Solver<'a, P> {
         self.callback_each_solution = Some(cb);
     }
                                  
+    pub fn count_solutions(&'a mut self) -> u32 {
+        let mut usable_candidates = BitVec::from_elem(self.candidates.len(), true);
+        
+        self.solve_ex(&mut usable_candidates);
+        
+        self.num_solutions
+    }
+    
     pub fn solve(&'a mut self) -> &'a Vec<Board<'a, P>> {
         let mut usable_candidates = BitVec::from_elem(self.candidates.len(), true);
 
+        self.enumerate_solutions = true;
+        
         self.solve_ex(&mut usable_candidates);
 
         &self.solutions
@@ -46,9 +58,11 @@ impl<'a, P:Polyomino> Solver<'a, P> {
 
     fn solve_ex(&mut self, usable_candidates: &mut BitVec) {
         if usable_candidates.none() {
-            self.solutions_found += 1;
+            self.num_solutions += 1;
 
-            self.solutions.push(self.board.clone());
+            if self.enumerate_solutions {
+                self.solutions.push(self.board.clone());
+            }
                 
             if let Some(cb) = self.callback_each_solution {
                 cb(self.board)
@@ -85,3 +99,12 @@ impl<'a, P:Polyomino> Solver<'a, P> {
     }
 }
     
+
+
+
+
+
+
+
+
+
