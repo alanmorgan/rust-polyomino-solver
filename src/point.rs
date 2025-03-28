@@ -44,7 +44,7 @@ impl Point for SimplePoint {
 
 impl fmt::Display for SimplePoint {
     fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
-        write!(f, " ")?;
+        write!(f, "X")?;
 
         Ok(())
     }
