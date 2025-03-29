@@ -220,7 +220,7 @@ impl<'a, P:Polyomino> Board<'a, P> {
     }
 
     fn on_board(&self, x: i16, y: i16) -> bool {
-        x < self.width && y < self.height
+        x >= 0 && y >= 0 && x < self.width && y < self.height
     }
 
     pub fn get_height(&self) -> i16 {
@@ -365,7 +365,7 @@ mod tests {
     use crate::point::SimplePoint;
     use crate::polyomino::Polyomino;
     use crate::polyomino::SimplePolyomino;
-
+    
     fn build_u() -> SimplePolyomino<SimplePoint> {
         let mut p = Vec::new();
         p.push(SimplePoint::new(0, 0));
@@ -440,14 +440,14 @@ mod tests {
         let mut b = Board::new(12, 5);
         b.add_polyomino(&w, &SimplePoint::new(0, 0));
         b.add_polyomino(&l, &SimplePoint::new(4, 0));
-        assert!(b.get(0, 0) == BoardState::Full(&w, 0, 0, 0));
-        assert!(b.get(4, 0) == BoardState::Full(&l, 0, 4, 0));
-        assert!(b.get(4, 3) == BoardState::Full(&l, 3, 4, 0));
+        assert_eq!(b.get(0, 0), BoardState::Full(&w, 0, 0, 0));
+        assert_eq!(b.get(4, 0), BoardState::Full(&l, 0, 4, 0));
+        assert_eq!(b.get(4, 3), BoardState::Full(&l, 3, 4, 0));
         b.remove_polyomino(&SimplePoint::new(1, 1));
-        assert!(b.get(0, 0) == BoardState::Empty);
-        assert!(b.get(4, 0) == BoardState::Full(&l, 0, 4, 0));
+        assert_eq!(b.get(0, 0), BoardState::Empty);
+        assert_eq!(b.get(4, 0), BoardState::Full(&l, 0, 4, 0));
         b.remove_polyomino(&SimplePoint::new(4, 2));
-        assert!(b.get(4, 0) == BoardState::Empty);
+        assert_eq!(b.get(4, 0), BoardState::Empty);
     }
 
     #[test]
@@ -462,6 +462,15 @@ mod tests {
         assert!(p10 > p07);
     }
 
+    #[test]
+    fn test_out_of_range() {
+        let u = build_u();
+        let mut b = Board::new(20, 3);
+        board_utils::fit(&mut b, &u);
+
+        assert_eq!(b.get(1, -1), BoardState::Void);
+    }
+    
     #[test]
     fn test_fit() {
         let u = build_u();
