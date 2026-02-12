@@ -17,7 +17,7 @@ pub enum Restrictions {
 }
 
 #[allow(dead_code)]
-pub fn build_variations<P:Polyomino>(polys: &Vec<P>, restrict: Restrictions) -> Vec<Vec<P>> {
+pub fn build_variations<P:Polyomino>(polys: &[P], restrict: Restrictions) -> Vec<Vec<P>> {
     let mut res = Vec::with_capacity(polys.len());
     let mut found_asym = false;
 

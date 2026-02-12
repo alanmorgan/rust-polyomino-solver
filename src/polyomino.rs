@@ -14,7 +14,7 @@ pub trait Polyomino : Sized + fmt::Display + Hash + Clone + PartialEq + Eq {
 
     fn new(ptrs: Vec<Self::Pt>) -> Self;
     
-    fn iter(&self) -> Iter<Self::Pt>;
+    fn iter(&self) -> Iter<'_, Self::Pt>;
 
     fn set_points(&mut self, pts: Vec<Self::Pt>);
 
@@ -117,7 +117,7 @@ impl <T: Point> Polyomino for SimplePolyomino<T> {
         SimplePolyomino{ points: points}
     }
 
-    fn iter(&self) -> Iter<Self::Pt> {
+    fn iter(&self) -> Iter<'_, Self::Pt> {
         self.points.iter()
     }
 

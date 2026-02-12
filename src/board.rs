@@ -139,7 +139,7 @@ impl<'a, P:Polyomino> Board<'a, P> {
         }
     }
 
-    pub fn from_file(name: &str) -> Result<Board<P>, Error> {
+    pub fn from_file(name: &str) -> Result<Board<'_, P>, Error> {
         let f = File::open(name)?;
 
         let buf_file = BufReader::new(&f);

@@ -9,7 +9,7 @@ type SolutionCallbackFn<T> = dyn Fn(&Board<T>);
 
 pub struct Solver<'a, P:Polyomino> {
     board: &'a mut Board<'a, P>,
-    candidates: &'a Vec<Vec<P>>,
+    candidates: &'a [Vec<P>],
     region_check: Option<&'a RegionCheckFn<P>>,
     callback_each_solution: Option<&'a SolutionCallbackFn<P>>,
     solutions: Vec<Board<'a, P>>,
@@ -18,7 +18,7 @@ pub struct Solver<'a, P:Polyomino> {
 }
 
 impl<'a, P:Polyomino> Solver<'a, P> {
-    pub fn new(b: &'a mut Board<'a, P>, c: &'a Vec<Vec<P>>) -> Solver<'a, P> {
+    pub fn new(b: &'a mut Board<'a, P>, c: &'a [Vec<P>]) -> Solver<'a, P> {
         Solver {
             board: b,
             candidates: c,
@@ -38,7 +38,7 @@ impl<'a, P:Polyomino> Solver<'a, P> {
         self.callback_each_solution = Some(cb);
     }
                                  
-    pub fn count_solutions(&'a mut self) -> u32 {
+    pub fn count_solutions(&mut self) -> u32 {
         let mut usable_candidates = BitVec::from_elem(self.candidates.len(), true);
         
         self.solve_ex(&mut usable_candidates);
